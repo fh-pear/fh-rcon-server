@@ -145,6 +145,8 @@ public class UserProtocol {
             return "tempban command not implemented at this time";
         } else if (s[0].equals("getprofile")) {
             str = cmdGetProfile();
+        } else if (s[0].equals("changepassword")) {
+            str = cmdChangePassword(s);
         } else {
             str = "Unknown command '" + s[0] + "'";
         }
@@ -330,7 +332,7 @@ public class UserProtocol {
 
     /* return string
      * <id>:<name>:<guid>:<connections>:<level (String title)>:<level (int value)>
-    */
+     */
     private String cmdGetProfile() {
         StringBuilder profile = new StringBuilder(150);
         ResultSet results = null;
@@ -341,16 +343,16 @@ public class UserProtocol {
             if (results.next()) {
                 profile.append(results.getString("id"));
                 profile.append(UNIT_SEPARATOR);
-                
+
                 profile.append(results.getString("name"));
                 profile.append(UNIT_SEPARATOR);
-                
+
                 profile.append(results.getString("guid"));
                 profile.append(UNIT_SEPARATOR);
-                
+
                 profile.append(results.getString("connections"));
                 profile.append(UNIT_SEPARATOR);
-                
+
                 String level = results.getString("group_bits");
                 int intLevel = parseLevel(level);
                 level = getLevelTitle(intLevel);
@@ -363,6 +365,7 @@ public class UserProtocol {
         }
 
         //System.out.println("results inside getprofile method: " + profile.toString());
+        profile.trimToSize();
         return profile.toString();
     }
 
@@ -552,6 +555,75 @@ public class UserProtocol {
         return str;
     }
 
+    // changepassword:<old password hash>:<new plaintext password>
+    private String cmdChangePassword(String[] opts) {
+        String str = "";
+
+        //save a database call by checking to see if the new password meets reqs first
+        String newPass = opts[2];
+        int min = 10;
+        int digit = 0; //need 1
+        int needDigit = 1;
+        int special = 0; //need 1
+        int needSpecial = 1;
+        int upCount = 0; //need 1
+        int needUpper = 1;
+        int lowCount = 0; //need 1
+        int needLower = 1;
+
+        if (newPass.length() >= min) {
+            for (int i = 0; i < newPass.length(); i++) {
+                char c = newPass.charAt(i);
+                if (Character.isUpperCase(c)) {
+                    upCount++;
+                }
+                if (Character.isLowerCase(c)) {
+                    lowCount++;
+                }
+                if (Character.isDigit(c)) {
+                    digit++;
+                }
+                if (c >= 33 && c <= 46 || c == 64) {
+                    special++;
+                }
+            }
+            if (special >= needSpecial && lowCount >= needLower && upCount >= needUpper && digit >= needDigit) {
+                System.out.println("New Password is good");
+                //check old password for verification
+                try {
+                    ResultSet user = d.getClientById(adminid);
+                    if (user.next())
+                    {
+                        String oldHash = opts[1];
+                        if (oldHash.equals(user.getString("password")))
+                        {
+                            //update password here since the current password matches
+                            d.updatePassword(adminid, Function.getMD5(newPass));
+                            str = "success";
+                        }
+                        else
+                        {
+                            str = "You entered your current password incorrectly";
+                        }
+                    }
+                } catch (SQLException ex) {
+                    str = "Failed to change password.";
+                    Logger.getLogger(UserProtocol.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+                str = "Your password must contain at least " + min + " characters: "
+                        + needDigit + " number, " + needSpecial + " special character, "
+                        + needUpper + " one uppercase, and " + needLower + " lower case letter.";
+            }
+        } else {
+            str = "Your password must contain at least " + min + " characters: "
+                    + needDigit + " number, " + needSpecial + " special character, "
+                    + needUpper + " one uppercase, and " + needLower + " lower case letter.";
+        }
+
+        return str;
+    }
+
     // penalties:<@id>
     private String cmdGetPenalties(String[] opts) {
         ResultSet results = null, clientResults = null;
@@ -610,10 +682,10 @@ public class UserProtocol {
             return true;
         }
     }
-    
+
     private String getLevelTitle(int l) {
         String str = "";
-        
+
         switch (l) {
             case 100:
                 str = "Leader";
@@ -652,9 +724,10 @@ public class UserProtocol {
                 str = "Guest";
                 break;
         }
-        
+
         return str;
     }
+
     private int parseLevel(String groupBits) {
         int l = 0;
 
