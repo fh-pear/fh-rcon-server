@@ -8,6 +8,11 @@ import java.util.logging.Logger;
 public class UserProtocol {
 
     public static final String UNIT_SEPARATOR = "\t";
+    
+    private final int BANPOWER = 60;
+    private final int KICKPOWER = 20;
+    private final int MAPPOWER = 40;
+    private final int NEXTMAPPOWER = 20;
 
     private final int LOGIN = 0;
     private final int VERIFY_VERSION = 1;
@@ -115,7 +120,14 @@ public class UserProtocol {
     }
 
     private String processCommand(String in) {
-        System.out.println("RECEIVED COMMAND: " + in);
+        /* check the command. if it's changepassword, only output what the command is
+         * this will ensure that a user's password doesn't get logged
+        */
+        if (in.contains("changepassword"))
+            System.out.println("RECEIVED COMMAND: changepassword");
+        else
+            System.out.println("RECEIVED COMMAND: " + in);
+        
         String str = "";
         String[] s = in.split(UNIT_SEPARATOR);
 
@@ -227,6 +239,9 @@ public class UserProtocol {
             return "Invalid parameters - '" + opts[0] + UNIT_SEPARATOR + opts[1] + UNIT_SEPARATOR
                     + opts[2] + UNIT_SEPARATOR + opts[3] + "'";
         }
+        
+        if (level < KICKPOWER)
+            return "You are not a high enough level to kick";
 
         ArrayList<Client> c = cod.getPlayerList();
         String str = "";
@@ -299,6 +314,9 @@ public class UserProtocol {
                     + opts[2] + UNIT_SEPARATOR + opts[3] + "'";
         }
 
+        if (level < BANPOWER)
+            return "You are not a high enough level to ban";
+        
         ArrayList<Client> c = cod.getPlayerList();
         String str = "";
 
