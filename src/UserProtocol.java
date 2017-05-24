@@ -10,6 +10,7 @@ public class UserProtocol {
     public static final String UNIT_SEPARATOR = "\t";
     
     private final int BANPOWER = 60;
+    private final int TEMPBANPOWER = 40;
     private final int KICKPOWER = 20;
     private final int MAPPOWER = 40;
     private final int NEXTMAPPOWER = 20;
@@ -284,6 +285,9 @@ public class UserProtocol {
             return "Invalid parameters - '" + opts[0] + UNIT_SEPARATOR + opts[1] + UNIT_SEPARATOR
                     + opts[2] + UNIT_SEPARATOR + opts[3] + UNIT_SEPARATOR + opts[4] + "'";
         }
+        
+        if (level < TEMPBANPOWER)
+            return "You are not a high enough level to tempban";
 
         ArrayList<Client> c = cod.getPlayerList();
 
