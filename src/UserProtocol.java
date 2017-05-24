@@ -144,7 +144,7 @@ public class UserProtocol {
         } else if (s[0].equals("tempban")) {
             return "tempban command not implemented at this time";
         } else if (s[0].equals("getprofile")) {
-            str = cmdGetProfile();
+            str = cmdGetProfile(s);
         } else if (s[0].equals("changepassword")) {
             str = cmdChangePassword(s);
         } else {
@@ -330,42 +330,102 @@ public class UserProtocol {
         return "ERROR: Client not found in current player list.";
     }
 
-    /* return string
-     * <id>:<name>:<guid>:<connections>:<level (String title)>:<level (int value)>
+    /* 
+     * @opts[] getprofile:self     OR     getprofile:<@id>
+     * @return str
+     *      <id>:<name>:<guid>:<connections>:<level (String title)>:<level (int value)>
      */
-    private String cmdGetProfile() {
+    private String cmdGetProfile(String opts[]) {
         StringBuilder profile = new StringBuilder(150);
         ResultSet results = null;
 
-        try {
-            results = d.getClientById(adminid);
+        if (opts[1].equals("self")) {
+            try {
+                results = d.getClientById(adminid);
 
-            if (results.next()) {
-                profile.append(results.getString("id"));
-                profile.append(UNIT_SEPARATOR);
+                if (results.next()) {
+                    profile.append(results.getString("id"));
+                    profile.append(UNIT_SEPARATOR);
 
-                profile.append(results.getString("name"));
-                profile.append(UNIT_SEPARATOR);
+                    profile.append(results.getString("name"));
+                    profile.append(UNIT_SEPARATOR);
 
-                profile.append(results.getString("guid"));
-                profile.append(UNIT_SEPARATOR);
+                    profile.append(results.getString("guid"));
+                    profile.append(UNIT_SEPARATOR);
 
-                profile.append(results.getString("connections"));
-                profile.append(UNIT_SEPARATOR);
+                    profile.append(results.getString("connections"));
+                    profile.append(UNIT_SEPARATOR);
 
-                String level = results.getString("group_bits");
-                int intLevel = parseLevel(level);
-                level = getLevelTitle(intLevel);
-                profile.append(level);
-                profile.append(UNIT_SEPARATOR);
-                profile.append(intLevel);
+                    String level = results.getString("group_bits");
+                    int intLevel = parseLevel(level);
+                    level = getLevelTitle(intLevel);
+                    profile.append(level);
+                    profile.append(UNIT_SEPARATOR);
+                    profile.append(intLevel);
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
             }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } else if (fullDetails) {
+            try {
+                results = d.getClientById(opts[1]);
+
+                if (results.next()) {
+                    profile.append(results.getString("id"));
+                    profile.append(UNIT_SEPARATOR);
+
+                    profile.append(results.getString("name"));
+                    profile.append(UNIT_SEPARATOR);
+
+                    profile.append(results.getString("guid"));
+                    profile.append(UNIT_SEPARATOR);
+
+                    profile.append(results.getString("connections"));
+                    profile.append(UNIT_SEPARATOR);
+
+                    String level = results.getString("group_bits");
+                    int intLevel = parseLevel(level);
+                    level = getLevelTitle(intLevel);
+                    profile.append(level);
+                    profile.append(UNIT_SEPARATOR);
+                    profile.append(intLevel);
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        } else {
+            try {
+                results = d.getClientById(opts[1]);
+
+                if (results.next()) {
+                    profile.append(results.getString("id"));
+                    profile.append(UNIT_SEPARATOR);
+
+                    profile.append(results.getString("name"));
+                    profile.append(UNIT_SEPARATOR);
+
+                    String guid = results.getString("guid");
+                    if (guid.length() > 8)
+                        guid = guid.substring(guid.length() - 8);
+                    profile.append(guid);
+                    profile.append(UNIT_SEPARATOR);
+
+                    profile.append(results.getString("connections"));
+                    profile.append(UNIT_SEPARATOR);
+
+                    String level = results.getString("group_bits");
+                    int intLevel = parseLevel(level);
+                    level = getLevelTitle(intLevel);
+                    profile.append(level);
+                    profile.append(UNIT_SEPARATOR);
+                    profile.append(intLevel);
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
         }
 
         //System.out.println("results inside getprofile method: " + profile.toString());
-        profile.trimToSize();
         return profile.toString();
     }
 
@@ -588,21 +648,17 @@ public class UserProtocol {
                 }
             }
             if (special >= needSpecial && lowCount >= needLower && upCount >= needUpper && digit >= needDigit) {
-                System.out.println("New Password is good");
+                //System.out.println("New Password is good");
                 //check old password for verification
                 try {
                     ResultSet user = d.getClientById(adminid);
-                    if (user.next())
-                    {
+                    if (user.next()) {
                         String oldHash = opts[1];
-                        if (oldHash.equals(user.getString("password")))
-                        {
+                        if (oldHash.equals(user.getString("password"))) {
                             //update password here since the current password matches
                             d.updatePassword(adminid, Function.getMD5(newPass));
                             str = "success";
-                        }
-                        else
-                        {
+                        } else {
                             str = "You entered your current password incorrectly";
                         }
                     }
