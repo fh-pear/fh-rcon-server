@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 public class UserProtocol {
 
     public static final String UNIT_SEPARATOR = "\t";
-    
+
     private final int BANPOWER = 60;
     private final int TEMPBANPOWER = 40;
     private final int KICKPOWER = 20;
@@ -123,12 +123,13 @@ public class UserProtocol {
     private String processCommand(String in) {
         /* check the command. if it's changepassword, only output what the command is
          * this will ensure that a user's password doesn't get logged
-        */
-        if (in.contains("changepassword"))
+         */
+        if (in.contains("changepassword")) {
             System.out.println("RECEIVED COMMAND: changepassword");
-        else
+        } else {
             System.out.println("RECEIVED COMMAND: " + in);
-        
+        }
+
         String str = "";
         String[] s = in.split(UNIT_SEPARATOR);
 
@@ -240,9 +241,10 @@ public class UserProtocol {
             return "Invalid parameters - '" + opts[0] + UNIT_SEPARATOR + opts[1] + UNIT_SEPARATOR
                     + opts[2] + UNIT_SEPARATOR + opts[3] + "'";
         }
-        
-        if (level < KICKPOWER)
+
+        if (level < KICKPOWER) {
             return "You are not a high enough level to kick";
+        }
 
         ArrayList<Client> c = cod.getPlayerList();
         String str = "";
@@ -285,9 +287,10 @@ public class UserProtocol {
             return "Invalid parameters - '" + opts[0] + UNIT_SEPARATOR + opts[1] + UNIT_SEPARATOR
                     + opts[2] + UNIT_SEPARATOR + opts[3] + UNIT_SEPARATOR + opts[4] + "'";
         }
-        
-        if (level < TEMPBANPOWER)
+
+        if (level < TEMPBANPOWER) {
             return "You are not a high enough level to tempban";
+        }
 
         ArrayList<Client> c = cod.getPlayerList();
 
@@ -318,9 +321,10 @@ public class UserProtocol {
                     + opts[2] + UNIT_SEPARATOR + opts[3] + "'";
         }
 
-        if (level < BANPOWER)
+        if (level < BANPOWER) {
             return "You are not a high enough level to ban";
-        
+        }
+
         ArrayList<Client> c = cod.getPlayerList();
         String str = "";
 
@@ -522,25 +526,76 @@ public class UserProtocol {
         ResultSet results = null;
         String str = "";
 
-        if (opts.length != 3) {
-            return "Invalid search parameters";
+        try {
+            if (opts.length != 3) {
+                return "Invalid search parameters";
+            }
+
+            if (opts[0].equals("name")) {
+
+            } else if (opts[0].equals("guid")) {
+                /* the search will support partial guid searches
+                 * this means that a valid search parameter for a guid COULD be "abc"
+                 */
+                results = d.getClient(opts[2]);
+                StringBuilder string = new StringBuilder(150);
+
+                while (results.next()) {
+                    string.append(results.getString("id"));
+                    string.append(UNIT_SEPARATOR);
+
+                    string.append(results.getString("name"));
+                    string.append(UNIT_SEPARATOR);
+
+                    if (fullDetails) {
+                        string.append(results.getString("guid"));
+                    } else {
+                        String guid = results.getString("guid");
+                        if (guid.length() > 8) {
+                            guid = guid.substring(guid.length() - 8);
+                        }
+                        string.append(guid);
+                    }
+                    string.append(UNIT_SEPARATOR);
+
+                    string.append(results.getString("connections"));
+                    string.append(UNIT_SEPARATOR);
+
+                    String level = results.getString("group_bits");
+                    int intLevel = parseLevel(level);
+                    level = getLevelTitle(intLevel);
+                    string.append(level);
+                    string.append(UNIT_SEPARATOR);
+                    string.append(intLevel);
+                    string.append(UNIT_SEPARATOR);
+
+                    string.append(results.getString("time_add"));
+                    string.append(UNIT_SEPARATOR);
+
+                    string.append(results.getString("time_edit"));
+                    string.append("\n");
+                }
+
+                str = string.toString();
+
+            } else if (opts[0].equals("clientid")) {
+                String[] profile = new String[2];
+                profile[0] = "getprofile";
+                profile[1] = opts[2];
+                str = cmdGetProfile(profile);
+
+            } else if (opts[0].equals("aliases")) {
+
+            } else {
+                return "ERROR: Unknown search type " + opts[0] + " \n"
+                        + "Available types are: name, guid, clientid, and aliases";
+            }
+        } catch (SQLException e) {
+            str = "Database ERROR: " + e.getMessage();
         }
 
-        if (opts[0].equals("name")) {
-
-        } else if (opts[0].equals("guid")) {
-
-        } else if (opts[0].equals("clientid")) {
-            String[] profile = new String[2];
-            profile[0] = "getprofile";
-            profile[1] = opts[2];
-            str = cmdGetProfile(profile);
-
-        } else if (opts[0].equals("aliases")) {
-
-        } else {
-            return "ERROR: Unknown search type " + opts[0] + " \n"
-                    + "Available types are: name, guid, clientid, and aliases";
+        if (str.equals("")) {
+            str = "none";
         }
 
         return str;
