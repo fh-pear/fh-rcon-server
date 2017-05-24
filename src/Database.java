@@ -47,7 +47,7 @@ public class Database {
 
             String kickString = "INSERT INTO `penalties` (`id`, `type`, `client_id`, `admin_id`, `duration`, `inactive`, `keyword`, `reason`, `data`, `time_add`, `time_edit`, `time_expire`) VALUES (NULL, 'Kick', ?, ?, '0', '0', '', ?, '', ?, ?, '-1')";
             kickStatement = con.prepareStatement(kickString);
-            
+
             String updatePassword = "UPDATE `clients` SET `password`=? WHERE `clients`.`id`=?";
             updatePasswordStatement = con.prepareStatement(updatePassword);
         } catch (SQLException e) {
@@ -79,15 +79,15 @@ public class Database {
             if (penaltyStatement != null) {
                 penaltyStatement.close();
             }
-            
+
             if (banStatement != null) {
                 banStatement.close();
             }
-            
+
             if (kickStatement != null) {
                 kickStatement.close();
             }
-            
+
             if (updatePasswordStatement != null) {
                 updatePasswordStatement.close();
             }
@@ -150,17 +150,16 @@ public class Database {
 
         return penaltyResults;
     }
-    
+
     /**
-     * 
+     *
      * @param userid the @id in the database to be updated
      * @param newPassword new hashed password value
      */
-    public void updatePassword(String userid, String newPassword) throws SQLException
-    {
+    public void updatePassword(String userid, String newPassword) throws SQLException {
         updatePasswordStatement.setString(1, newPassword);
         updatePasswordStatement.setString(2, userid);
-        
+
         updatePasswordStatement.executeUpdate();
     }
 

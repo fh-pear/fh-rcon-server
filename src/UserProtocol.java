@@ -16,7 +16,7 @@ public class UserProtocol {
     private ClientServer cod;
     private int level, clientLevel;
     private boolean fullDetails, clientMask = false;
-    private String adminid, clientid = "";
+    private String adminid, clientid = "", adminName = "";
 
     private int state = LOGIN;
 
@@ -210,7 +210,7 @@ public class UserProtocol {
             Client client = c.get(i);
 
             if (client.getClientId().equals(opts[1]) && client.getShortGuid().equals(opts[2])) {
-                return cod.sendPM(client.getClientId(), client.getGuid(), opts[3]);
+                return cod.sendPM(client.getClientId(), adminName, client.getGuid(), opts[3]);
             }
         }
 
@@ -352,6 +352,7 @@ public class UserProtocol {
                     profile.append(UNIT_SEPARATOR);
 
                     profile.append(results.getString("name"));
+                    adminName = results.getString("name");
                     profile.append(UNIT_SEPARATOR);
 
                     profile.append(results.getString("guid"));
@@ -367,10 +368,10 @@ public class UserProtocol {
                     profile.append(UNIT_SEPARATOR);
                     profile.append(intLevel);
                     profile.append(UNIT_SEPARATOR);
-                    
+
                     profile.append(results.getString("time_add"));
                     profile.append(UNIT_SEPARATOR);
-                    
+
                     profile.append(results.getString("time_edit"));
                 }
             } catch (SQLException e) {
@@ -400,10 +401,10 @@ public class UserProtocol {
                     profile.append(UNIT_SEPARATOR);
                     profile.append(intLevel);
                     profile.append(UNIT_SEPARATOR);
-                    
+
                     profile.append(results.getString("time_add"));
                     profile.append(UNIT_SEPARATOR);
-                    
+
                     profile.append(results.getString("time_edit"));
                 }
             } catch (SQLException e) {
@@ -437,10 +438,10 @@ public class UserProtocol {
                     profile.append(UNIT_SEPARATOR);
                     profile.append(intLevel);
                     profile.append(UNIT_SEPARATOR);
-                    
+
                     profile.append(results.getString("time_add"));
                     profile.append(UNIT_SEPARATOR);
-                    
+
                     profile.append(results.getString("time_edit"));
                 }
             } catch (SQLException e) {
@@ -586,9 +587,10 @@ public class UserProtocol {
             return "Your program supplied '" + opts[1] + "' as a number. Could not parse as a number.";
         }
 
-        if (str.equals(""))
+        if (str.equals("")) {
             str = "none";
-        
+        }
+
         return str;
     }
 
