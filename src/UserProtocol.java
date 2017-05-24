@@ -333,11 +333,15 @@ public class UserProtocol {
     /* 
      * @opts[] getprofile:self     OR     getprofile:<@id>
      * @return str
-     *      <id>:<name>:<guid>:<connections>:<level (String title)>:<level (int value)>
+     *      <id>:<name>:<guid>:<connections>:<level (String title)>:<level (int value)>:<first seen>:<last seen>
      */
     private String cmdGetProfile(String opts[]) {
         StringBuilder profile = new StringBuilder(150);
         ResultSet results = null;
+
+        if (opts.length != 2) {
+            return "Invalid paramenters for command 'getprofile'";
+        }
 
         if (opts[1].equals("self")) {
             try {
@@ -362,6 +366,12 @@ public class UserProtocol {
                     profile.append(level);
                     profile.append(UNIT_SEPARATOR);
                     profile.append(intLevel);
+                    profile.append(UNIT_SEPARATOR);
+                    
+                    profile.append(results.getString("time_add"));
+                    profile.append(UNIT_SEPARATOR);
+                    
+                    profile.append(results.getString("time_edit"));
                 }
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
@@ -389,6 +399,12 @@ public class UserProtocol {
                     profile.append(level);
                     profile.append(UNIT_SEPARATOR);
                     profile.append(intLevel);
+                    profile.append(UNIT_SEPARATOR);
+                    
+                    profile.append(results.getString("time_add"));
+                    profile.append(UNIT_SEPARATOR);
+                    
+                    profile.append(results.getString("time_edit"));
                 }
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
@@ -405,8 +421,9 @@ public class UserProtocol {
                     profile.append(UNIT_SEPARATOR);
 
                     String guid = results.getString("guid");
-                    if (guid.length() > 8)
+                    if (guid.length() > 8) {
                         guid = guid.substring(guid.length() - 8);
+                    }
                     profile.append(guid);
                     profile.append(UNIT_SEPARATOR);
 
@@ -419,6 +436,12 @@ public class UserProtocol {
                     profile.append(level);
                     profile.append(UNIT_SEPARATOR);
                     profile.append(intLevel);
+                    profile.append(UNIT_SEPARATOR);
+                    
+                    profile.append(results.getString("time_add"));
+                    profile.append(UNIT_SEPARATOR);
+                    
+                    profile.append(results.getString("time_edit"));
                 }
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
@@ -480,22 +503,21 @@ public class UserProtocol {
             return "Invalid search parameters";
         }
 
-        try {
+        if (opts[0].equals("name")) {
 
-            if (opts[0].equals("name")) {
+        } else if (opts[0].equals("guid")) {
 
-            } else if (opts[0].equals("guid")) {
+        } else if (opts[0].equals("clientid")) {
+            String[] profile = new String[2];
+            profile[0] = "getprofile";
+            profile[1] = opts[2];
+            str = cmdGetProfile(profile);
 
-            } else if (opts[0].equals("clientid")) {
-                Integer.parseInt(opts[2]);
-            } else if (opts[0].equals("aliases")) {
+        } else if (opts[0].equals("aliases")) {
 
-            } else {
-                return "ERROR: Unknown search type " + opts[0] + " \n"
-                        + "Available types are: name, guid, clientid, and aliases";
-            }
-        } catch (NumberFormatException e) {
-            return "Your program supplied '" + opts[1] + "' as a number. Could not parse as a number.";
+        } else {
+            return "ERROR: Unknown search type " + opts[0] + " \n"
+                    + "Available types are: name, guid, clientid, and aliases";
         }
 
         return str;
@@ -564,6 +586,9 @@ public class UserProtocol {
             return "Your program supplied '" + opts[1] + "' as a number. Could not parse as a number.";
         }
 
+        if (str.equals(""))
+            str = "none";
+        
         return str;
     }
 
@@ -617,6 +642,9 @@ public class UserProtocol {
 
     // changepassword:<old password hash>:<new plaintext password>
     private String cmdChangePassword(String[] opts) {
+        if (opts.length != 3) {
+            return "Invalid parameters for command 'changepassword'";
+        }
         String str = "";
 
         //save a database call by checking to see if the new password meets reqs first
