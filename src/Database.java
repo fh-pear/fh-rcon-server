@@ -18,6 +18,7 @@ public class Database {
     PreparedStatement penaltyStatement = null;
     PreparedStatement banStatement = null;
     PreparedStatement kickStatement = null;
+    PreparedStatement updatePasswordStatement = null;
 
     ResultSet rs = null;
 
@@ -46,6 +47,9 @@ public class Database {
 
             String kickString = "INSERT INTO `penalties` (`id`, `type`, `client_id`, `admin_id`, `duration`, `inactive`, `keyword`, `reason`, `data`, `time_add`, `time_edit`, `time_expire`) VALUES (NULL, 'Kick', ?, ?, '0', '0', '', ?, '', ?, ?, '-1')";
             kickStatement = con.prepareStatement(kickString);
+            
+            String updatePassword = "UPDATE `clients` SET `password`=? WHERE `clients`.`id`=?";
+            updatePasswordStatement = con.prepareStatement(updatePassword);
         } catch (SQLException e) {
             System.out.println("SQLException occurred");
             System.out.println(e.getMessage());
@@ -74,6 +78,18 @@ public class Database {
             }
             if (penaltyStatement != null) {
                 penaltyStatement.close();
+            }
+            
+            if (banStatement != null) {
+                banStatement.close();
+            }
+            
+            if (kickStatement != null) {
+                kickStatement.close();
+            }
+            
+            if (updatePasswordStatement != null) {
+                updatePasswordStatement.close();
             }
 
             if (rs != null) {
@@ -134,12 +150,25 @@ public class Database {
 
         return penaltyResults;
     }
+    
+    /**
+     * 
+     * @param userid the @id in the database to be updated
+     * @param newPassword new hashed password value
+     */
+    public void updatePassword(String userid, String newPassword) throws SQLException
+    {
+        updatePasswordStatement.setString(1, newPassword);
+        updatePasswordStatement.setString(2, userid);
+        
+        updatePasswordStatement.executeUpdate();
+    }
 
     /*
-	 * SQL query build order
-	 * client_id, admin_id, reason, time_add, time_edit
-	 *
-	 * id will be filled automatic
+     * SQL query build order
+     * client_id, admin_id, reason, time_add, time_edit
+     *
+     * id will be filled automatic
      */
     public void banClient(String clientid, String adminid, String reason) throws SQLException {
         //sets the client_id
