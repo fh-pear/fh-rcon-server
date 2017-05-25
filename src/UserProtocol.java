@@ -161,6 +161,8 @@ public class UserProtocol {
             str = cmdGetProfile(s);
         } else if (s[0].equals("changepassword")) {
             str = cmdChangePassword(s);
+        } else if (s[0].equals("search")) {
+            str = cmdSearch(s);
         } else {
             str = "Unknown command '" + s[0] + "'";
         }
@@ -521,7 +523,7 @@ public class UserProtocol {
     }
 
     // opts: search:<type>:<data>
-    // <type>: name, guid, clientid, aliases
+    // <type>: name, guid, clientid
     public String cmdSearch(String[] opts) {
         ResultSet results = null;
         String str = "";
@@ -531,13 +533,9 @@ public class UserProtocol {
                 return "Invalid search parameters";
             }
 
-            if (opts[0].equals("name")) {
-
-            } else if (opts[0].equals("guid")) {
-                /* the search will support partial guid searches
-                 * this means that a valid search parameter for a guid COULD be "abc"
-                 */
-                results = d.getClient(opts[2]);
+            if (opts[1].equals("name")) {
+                // the search will support partial name searches
+                results = d.searchByName(opts[2]);
                 StringBuilder string = new StringBuilder(150);
 
                 while (results.next()) {
@@ -573,22 +571,71 @@ public class UserProtocol {
                     string.append(UNIT_SEPARATOR);
 
                     string.append(results.getString("time_edit"));
-                    string.append("\n");
+
+                    if (!results.isLast()) {
+                        string.append("\n");
+                    }
                 }
 
                 str = string.toString();
 
-            } else if (opts[0].equals("clientid")) {
+            } else if (opts[1].equals("guid")) {
+                /* the search will support partial guid searches
+                 * this means that a valid search parameter for a guid COULD be "abc"
+                 */
+                results = d.searchByGuid(opts[2]);
+                StringBuilder string = new StringBuilder(150);
+
+                while (results.next()) {
+                    string.append(results.getString("id"));
+                    string.append(UNIT_SEPARATOR);
+
+                    string.append(results.getString("name"));
+                    string.append(UNIT_SEPARATOR);
+
+                    if (fullDetails) {
+                        string.append(results.getString("guid"));
+                    } else {
+                        String guid = results.getString("guid");
+                        if (guid.length() > 8) {
+                            guid = guid.substring(guid.length() - 8);
+                        }
+                        string.append(guid);
+                    }
+                    string.append(UNIT_SEPARATOR);
+
+                    string.append(results.getString("connections"));
+                    string.append(UNIT_SEPARATOR);
+
+                    String level = results.getString("group_bits");
+                    int intLevel = parseLevel(level);
+                    level = getLevelTitle(intLevel);
+                    string.append(level);
+                    string.append(UNIT_SEPARATOR);
+                    string.append(intLevel);
+                    string.append(UNIT_SEPARATOR);
+
+                    string.append(results.getString("time_add"));
+                    string.append(UNIT_SEPARATOR);
+
+                    string.append(results.getString("time_edit"));
+
+                    if (!results.isLast()) {
+                        string.append("\n");
+                    }
+                }
+
+                str = string.toString();
+
+            } else if (opts[1].equals("clientid")) {
                 String[] profile = new String[2];
                 profile[0] = "getprofile";
                 profile[1] = opts[2];
                 str = cmdGetProfile(profile);
 
-            } else if (opts[0].equals("aliases")) {
-
             } else {
                 return "ERROR: Unknown search type " + opts[0] + " \n"
-                        + "Available types are: name, guid, clientid, and aliases";
+                        + "Available types are: name, guid, clientid";
             }
         } catch (SQLException e) {
             str = "Database ERROR: " + e.getMessage();
