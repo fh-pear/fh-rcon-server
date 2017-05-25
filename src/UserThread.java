@@ -29,7 +29,7 @@ public class UserThread extends Thread {
             while ((inputLine = in.readLine()) != null) {
                 outputLine = p.processInput(inputLine);
                 out.println(outputLine);
-                if (outputLine.equals("exit")) {
+                if (outputLine.equals("exit") || outputLine.contains("You need to update to version:")) {
                     break;
                 }
             }
