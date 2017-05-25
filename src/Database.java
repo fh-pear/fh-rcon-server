@@ -12,6 +12,7 @@ public class Database {
 
     Connection con = null;
     PreparedStatement guidStatement = null;
+    PreparedStatement guidSearchStatement = null;
     PreparedStatement idStatement = null;
     PreparedStatement queryStatement = null;
     PreparedStatement aliasStatement = null;
@@ -19,6 +20,7 @@ public class Database {
     PreparedStatement banStatement = null;
     PreparedStatement kickStatement = null;
     PreparedStatement updatePasswordStatement = null;
+    PreparedStatement nameSearchStatement = null;
 
     ResultSet rs = null;
 
@@ -29,6 +31,9 @@ public class Database {
 
             String queryGuid = "SELECT * FROM `clients` WHERE guid=? LIMIT 0,1";
             guidStatement = con.prepareStatement(queryGuid);
+            
+            String guid = "SELECT * FROM `clients` WHERE `guid` LIKE ?";
+            guidSearchStatement = con.prepareStatement(guid);
 
             String queryId = "SELECT * FROM `clients` WHERE id=? LIMIT 0,1";
             idStatement = con.prepareStatement(queryId);
@@ -50,6 +55,9 @@ public class Database {
 
             String updatePassword = "UPDATE `clients` SET `password`=? WHERE `clients`.`id`=?";
             updatePasswordStatement = con.prepareStatement(updatePassword);
+            
+            String name = "SELECT * FROM `clients` WHERE `name` LIKE ?";
+            nameSearchStatement = con.prepareStatement(name);
         } catch (SQLException e) {
             System.out.println("SQLException occurred");
             System.out.println(e.getMessage());
@@ -61,6 +69,9 @@ public class Database {
 
     }
 
+    /**
+     * Gracefully close out all of the PreparedStatements and the database connection
+     */
     public void close() {
         try {
             /*close out the prepared statements*/
@@ -91,6 +102,10 @@ public class Database {
             if (updatePasswordStatement != null) {
                 updatePasswordStatement.close();
             }
+            
+            if (nameSearchStatement != null) {
+                nameSearchStatement.close();
+            }
 
             if (rs != null) {
                 rs.close();
@@ -108,22 +123,27 @@ public class Database {
         return results;
     }
 
-    public ResultSet getAliases(String cid) throws SQLException {
+    /**
+     * 
+     * @param id database id to be used in obtaining alias rows
+     * @return ResultSet of aliases that belong to the key provided in parameter id
+     * @throws SQLException 
+     */
+    public ResultSet getAliases(String id) throws SQLException {
         ResultSet aliasResults = null;
 
-        aliasStatement.setString(1, cid);
-
+        aliasStatement.setString(1, id);
         aliasResults = aliasStatement.executeQuery();
-        /*
-   		while (rs.next()) { 
-   			aliasResults.add(rs.getString("alias"));
-   			aliasResults.add(rs.getString("time_add"));
-   			aliasResults.add(rs.getString("time_edit"));
-   		}*/
 
         return aliasResults;
     }
 
+    /**
+     * 
+     * @param guid full GUID of the client that is being searched for
+     * @return ResultSet containing the row with the matching guid key
+     * @throws SQLException 
+     */
     public ResultSet getClient(String guid) throws SQLException {
         ResultSet clientResults = null;
 
@@ -133,6 +153,12 @@ public class Database {
         return clientResults;
     }
 
+    /**
+     * 
+     * @param id database id to obtain a row against
+     * @return ResultSet of the belonging to the supplied id
+     * @throws SQLException 
+     */
     public ResultSet getClientById(String id) throws SQLException {
         ResultSet clientResults = null;
 
@@ -142,6 +168,12 @@ public class Database {
         return clientResults;
     }
 
+    /**
+     * 
+     * @param id the database id to query against
+     * @return ResultSet containing all penalty rows belonging to parameter id
+     * @throws SQLException 
+     */
     public ResultSet getPenalties(String id) throws SQLException {
         ResultSet penaltyResults = null;
 
@@ -150,11 +182,42 @@ public class Database {
 
         return penaltyResults;
     }
+    
+    /**
+     * 
+     * @param name full or partial name to search database for clients with
+     * @return ResultSet containing the returned rows from the database
+     * @throws SQLException 
+     */
+    public ResultSet searchByName(String name) throws SQLException {
+        ResultSet results = null;
+        
+        nameSearchStatement.setString(1, "%" + name + "%");
+        results = nameSearchStatement.executeQuery();
+        
+        return results;
+    }
+    
+    /**
+     * 
+     * @param guid full OR partial GUID to search database for
+     * @return ResultSet containing the returned rows from the database
+     * @throws SQLException 
+     */
+    public ResultSet searchByGuid(String guid) throws SQLException {
+        ResultSet results = null;
+        
+        guidSearchStatement.setString(1, "%" + guid + "%");
+        results = guidSearchStatement.executeQuery();
+        
+        return results;
+    }
 
     /**
      *
      * @param userid the @id in the database to be updated
      * @param newPassword new hashed password value
+     * @throws SQLException
      */
     public void updatePassword(String userid, String newPassword) throws SQLException {
         updatePasswordStatement.setString(1, newPassword);
@@ -163,11 +226,12 @@ public class Database {
         updatePasswordStatement.executeUpdate();
     }
 
-    /*
-     * SQL query build order
-     * client_id, admin_id, reason, time_add, time_edit
-     *
-     * id will be filled automatic
+    /**
+     * 
+     * @param clientid the database id to execute query against
+     * @param adminid the admin id who is requesting the action
+     * @param reason the reason to be recorded in the database
+     * @throws SQLException 
      */
     public void banClient(String clientid, String adminid, String reason) throws SQLException {
         //sets the client_id
@@ -189,6 +253,13 @@ public class Database {
         banStatement.executeUpdate();
     }
 
+    /**
+     * 
+     * @param clientid the database id to execute the query against
+     * @param adminid the database id of the admin requesting the action
+     * @param reason reason for the action, to be recorded in the database
+     * @throws SQLException 
+     */
     public void kickClient(String clientid, String adminid, String reason) throws SQLException {
         kickStatement.setString(1, clientid);
         kickStatement.setString(2, adminid);
