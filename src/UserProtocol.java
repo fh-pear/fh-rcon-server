@@ -523,7 +523,7 @@ public class UserProtocol {
     }
 
     // opts: search:<type>:<data>
-    // <type>: name, guid, clientid
+    // <type>: name, guid, @id
     public String cmdSearch(String[] opts) {
         ResultSet results = null;
         String str = "";
@@ -532,6 +532,9 @@ public class UserProtocol {
             if (opts.length != 3) {
                 return "Invalid search parameters";
             }
+            
+            if (opts[2].length() < 2 && !opts[1].toLowerCase().equals("@id"))
+                return "ERROR: Enter more than one character to search for";
 
             if (opts[1].equals("name")) {
                 // the search will support partial name searches
@@ -627,7 +630,7 @@ public class UserProtocol {
 
                 str = string.toString();
 
-            } else if (opts[1].equals("clientid")) {
+            } else if (opts[1].equals("@id")) {
                 String[] profile = new String[2];
                 profile[0] = "getprofile";
                 profile[1] = opts[2];
