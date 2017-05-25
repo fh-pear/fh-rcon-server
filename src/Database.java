@@ -31,7 +31,7 @@ public class Database {
 
             String queryGuid = "SELECT * FROM `clients` WHERE guid=? LIMIT 0,1";
             guidStatement = con.prepareStatement(queryGuid);
-            
+
             String guid = "SELECT * FROM `clients` WHERE `guid` LIKE ?";
             guidSearchStatement = con.prepareStatement(guid);
 
@@ -55,7 +55,7 @@ public class Database {
 
             String updatePassword = "UPDATE `clients` SET `password`=? WHERE `clients`.`id`=?";
             updatePasswordStatement = con.prepareStatement(updatePassword);
-            
+
             String name = "SELECT * FROM `clients` WHERE `name` LIKE ?";
             nameSearchStatement = con.prepareStatement(name);
         } catch (SQLException e) {
@@ -70,7 +70,8 @@ public class Database {
     }
 
     /**
-     * Gracefully close out all of the PreparedStatements and the database connection
+     * Gracefully close out all of the PreparedStatements and the database
+     * connection
      */
     public void close() {
         try {
@@ -102,7 +103,7 @@ public class Database {
             if (updatePasswordStatement != null) {
                 updatePasswordStatement.close();
             }
-            
+
             if (nameSearchStatement != null) {
                 nameSearchStatement.close();
             }
@@ -124,10 +125,11 @@ public class Database {
     }
 
     /**
-     * 
+     *
      * @param id database id to be used in obtaining alias rows
-     * @return ResultSet of aliases that belong to the key provided in parameter id
-     * @throws SQLException 
+     * @return ResultSet of aliases that belong to the key provided in parameter
+     * id
+     * @throws SQLException
      */
     public ResultSet getAliases(String id) throws SQLException {
         ResultSet aliasResults = null;
@@ -139,10 +141,10 @@ public class Database {
     }
 
     /**
-     * 
+     *
      * @param guid full GUID of the client that is being searched for
      * @return ResultSet containing the row with the matching guid key
-     * @throws SQLException 
+     * @throws SQLException
      */
     public ResultSet getClient(String guid) throws SQLException {
         ResultSet clientResults = null;
@@ -154,10 +156,10 @@ public class Database {
     }
 
     /**
-     * 
+     *
      * @param id database id to obtain a row against
      * @return ResultSet of the belonging to the supplied id
-     * @throws SQLException 
+     * @throws SQLException
      */
     public ResultSet getClientById(String id) throws SQLException {
         ResultSet clientResults = null;
@@ -169,10 +171,10 @@ public class Database {
     }
 
     /**
-     * 
+     *
      * @param id the database id to query against
      * @return ResultSet containing all penalty rows belonging to parameter id
-     * @throws SQLException 
+     * @throws SQLException
      */
     public ResultSet getPenalties(String id) throws SQLException {
         ResultSet penaltyResults = null;
@@ -182,34 +184,34 @@ public class Database {
 
         return penaltyResults;
     }
-    
+
     /**
-     * 
+     *
      * @param name full or partial name to search database for clients with
      * @return ResultSet containing the returned rows from the database
-     * @throws SQLException 
+     * @throws SQLException
      */
     public ResultSet searchByName(String name) throws SQLException {
         ResultSet results = null;
-        
+
         nameSearchStatement.setString(1, "%" + name + "%");
         results = nameSearchStatement.executeQuery();
-        
+
         return results;
     }
-    
+
     /**
-     * 
+     *
      * @param guid full OR partial GUID to search database for
      * @return ResultSet containing the returned rows from the database
-     * @throws SQLException 
+     * @throws SQLException
      */
     public ResultSet searchByGuid(String guid) throws SQLException {
         ResultSet results = null;
-        
+
         guidSearchStatement.setString(1, "%" + guid + "%");
         results = guidSearchStatement.executeQuery();
-        
+
         return results;
     }
 
@@ -227,11 +229,11 @@ public class Database {
     }
 
     /**
-     * 
+     *
      * @param clientid the database id to execute query against
      * @param adminid the admin id who is requesting the action
      * @param reason the reason to be recorded in the database
-     * @throws SQLException 
+     * @throws SQLException
      */
     public void banClient(String clientid, String adminid, String reason) throws SQLException {
         //sets the client_id
@@ -254,11 +256,11 @@ public class Database {
     }
 
     /**
-     * 
+     *
      * @param clientid the database id to execute the query against
      * @param adminid the database id of the admin requesting the action
      * @param reason reason for the action, to be recorded in the database
-     * @throws SQLException 
+     * @throws SQLException
      */
     public void kickClient(String clientid, String adminid, String reason) throws SQLException {
         kickStatement.setString(1, clientid);
