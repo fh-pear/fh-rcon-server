@@ -39,6 +39,22 @@ public class ClientServer {
         return info;
     }
     
+    public String sendRcon(String rconCommand) {
+        
+        if (rconCommand.equals("map_rotate") || rconCommand.contains("map mp_"))
+            server.setTimeout(1000);
+        
+        String str = "";
+        server.setReturnData(true);
+        do {
+            str = server.sendCommand(rconCommand);
+        } while (info.isEmpty());
+        server.setReturnData(false);
+        server.setTimeout(timeout);
+        
+        return str;
+    }
+    
     public String getServerName() {
         String str = "";
         
