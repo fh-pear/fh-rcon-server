@@ -51,7 +51,7 @@ public class Database {
             String banString = "INSERT INTO `penalties` (`id`, `type`, `client_id`, `admin_id`, `duration`, `inactive`, `keyword`, `reason`, `data`, `time_add`, `time_edit`, `time_expire`) VALUES (NULL, 'Ban', ?, ?, '0', '0', 'rcon', ?, '', ?, ?, '-1')";
             banStatement = con.prepareStatement(banString);
             
-            String tempbanString = "INSERT INTO `penalties` (`id`, `type`, `client_id`, `admin_id`, `duration`, `inactive`, `keyword`, `reason`, `data`, `time_add`, `time_edit`, `time_expire`) VALUES (NULL, 'TempBan', ?, ?, '?', '0', 'rcon', ?, '', ?, ?, '?')";
+            String tempbanString = "INSERT INTO `penalties` (`id`, `type`, `client_id`, `admin_id`, `duration`, `inactive`, `keyword`, `reason`, `data`, `time_add`, `time_edit`, `time_expire`) VALUES (NULL, 'TempBan', ?, ?, ?, '0', 'rcon', ?, '', ?, ?, ?)";
             tempbanStatement = con.prepareStatement(tempbanString);
             
             String kickString = "INSERT INTO `penalties` (`id`, `type`, `client_id`, `admin_id`, `duration`, `inactive`, `keyword`, `reason`, `data`, `time_add`, `time_edit`, `time_expire`) VALUES (NULL, 'Kick', ?, ?, '0', '0', 'rcon', ?, '', ?, ?, '-1')";
@@ -268,14 +268,16 @@ public class Database {
      * @param clientid @id of the client the action will be against
      * @param adminid @id of the admin calling the action
      * @param reason admin supplied reason
-     * @param duration amount of time, in seconds
+     * @param duration amount of time, in minutes
+     * @param seconds amount of time, in seconds
      * @throws SQLException 
      */
-    public void tempbanClient(String clientid, String adminid, String reason, int duration) throws SQLException {
+    public void tempbanClient(String clientid, String adminid, String reason, 
+            long seconds, long duration) throws SQLException {
         tempbanStatement.setString(1, clientid);
         tempbanStatement.setString(2, adminid);
         
-        tempbanStatement.setString(3, String.valueOf(duration));
+        tempbanStatement.setString(3, String.valueOf(seconds));
         tempbanStatement.setString(4, reason);
         
         Date now = new Date();

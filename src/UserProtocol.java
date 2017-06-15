@@ -157,7 +157,7 @@ public class UserProtocol {
         } else if (s[0].equals("ban")) {
             str = cmdBan(s);
         } else if (s[0].equals("tempban")) {
-            return "tempban command not implemented at this time";
+            str = cmdTempBan(s);
         } else if (s[0].equals("getprofile")) {
             str = cmdGetProfile(s);
         } else if (s[0].equals("changepassword")) {
@@ -311,13 +311,14 @@ public class UserProtocol {
 
     // opts: temp:<cid>:<short_guid>:<duration>:<reason>
     private String cmdTempBan(String[] opts) {
-        if (opts.length != 5) {
+        if (opts.length != 6) {
             return "Invalid tempban parameters.";
         }
 
         if (opts[1].isEmpty() || opts[2].isEmpty() || opts[3].isEmpty() || opts[4].isEmpty()) {
             return "Invalid parameters - '" + opts[0] + UNIT_SEPARATOR + opts[1] + UNIT_SEPARATOR
-                    + opts[2] + UNIT_SEPARATOR + opts[3] + UNIT_SEPARATOR + opts[4] + "'";
+                    + opts[2] + UNIT_SEPARATOR + opts[3] + UNIT_SEPARATOR + opts[4] 
+                    + UNIT_SEPARATOR + opts[5] + "'";
         }
 
         if (level < TEMPBANPOWER) {
@@ -336,15 +337,22 @@ public class UserProtocol {
                     try {
                         String array[] = {"", client.getGuid()};
                         String reason = "(RCon) " + opts[4];
-
-                        d.banClient(cmdGetDataId(array), adminid, reason);
-                        str = "Ban added to database.\n ";
+                        long sec = Long.parseLong(opts[3]);
+                        long dur = Long.parseLong(opts[5]);
+                        if (dur < 0)
+                            throw new NumberFormatException(dur + " is negative");
+                        
+                        d.tempbanClient(cmdGetDataId(array), adminid, reason, sec, dur);
+                        str = "Tempban added to database.\n ";
                     } catch (SQLException e) {
                         System.out.println(e.getMessage());
                         str = "Adding ban to database failed...";
+                    } catch (NumberFormatException e) {
+                        return "You must supply a positive number for tempban duration: " + e;
                     }
                     
-                    str += cod.sendTempBan(client.getClientId(), client.getGuid(), client.getName(), opts[4]);
+                    //str += cod.sendTempBan(client.getClientId(), client.getGuid(), client.getName(), opts[4]);
+                    str += client.getName() + " with guid " + client.getGuid() + " would be tempbanned";
                     return str;
                 } else {
                     return client.getName() + " is a higher/equal level admin.";
@@ -390,7 +398,7 @@ public class UserProtocol {
                         str = "Adding ban to database failed...";
                     }
 
-                    str += cod.sendBan(client.getClientId(), client.getGuid(), opts[3]);
+                    str += cod.sendBan(client.getClientId(), client.getGuid(), client.getName(), opts[3]);
                     return str;
                 } else {
                     return client.getName() + " is a higher/equal level admin.";

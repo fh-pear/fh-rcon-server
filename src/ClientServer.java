@@ -227,8 +227,10 @@ public class ClientServer {
         return str;
     }
 
-    public String sendBan(String clientid, String guid, String reason) {
+    public String sendBan(String clientid, String guid, String name, String reason) {
         String str = "";
+        
+        sendMessage(name + " was permanently banned for ^2" + reason);
 
         server.setReturnData(true);
         do {
