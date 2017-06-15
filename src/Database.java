@@ -18,6 +18,7 @@ public class Database {
     PreparedStatement aliasStatement = null;
     PreparedStatement penaltyStatement = null;
     PreparedStatement banStatement = null;
+    PreparedStatement tempbanStatement = null;
     PreparedStatement kickStatement = null;
     PreparedStatement updatePasswordStatement = null;
     PreparedStatement nameSearchStatement = null;
@@ -47,10 +48,13 @@ public class Database {
             String queryPenalties = "SELECT * FROM  `penalties` WHERE `client_id`=? ORDER BY `time_add` DESC";
             penaltyStatement = con.prepareStatement(queryPenalties);
 
-            String banString = "INSERT INTO `penalties` (`id`, `type`, `client_id`, `admin_id`, `duration`, `inactive`, `keyword`, `reason`, `data`, `time_add`, `time_edit`, `time_expire`) VALUES (NULL, 'Ban', ?, ?, '0', '0', '', ?, '', ?, ?, '-1')";
+            String banString = "INSERT INTO `penalties` (`id`, `type`, `client_id`, `admin_id`, `duration`, `inactive`, `keyword`, `reason`, `data`, `time_add`, `time_edit`, `time_expire`) VALUES (NULL, 'Ban', ?, ?, '0', '0', 'rcon', ?, '', ?, ?, '-1')";
             banStatement = con.prepareStatement(banString);
-
-            String kickString = "INSERT INTO `penalties` (`id`, `type`, `client_id`, `admin_id`, `duration`, `inactive`, `keyword`, `reason`, `data`, `time_add`, `time_edit`, `time_expire`) VALUES (NULL, 'Kick', ?, ?, '0', '0', '', ?, '', ?, ?, '-1')";
+            
+            String tempbanString = "INSERT INTO `penalties` (`id`, `type`, `client_id`, `admin_id`, `duration`, `inactive`, `keyword`, `reason`, `data`, `time_add`, `time_edit`, `time_expire`) VALUES (NULL, 'TempBan', ?, ?, '?', '0', 'rcon', ?, '', ?, ?, '?')";
+            tempbanStatement = con.prepareStatement(tempbanString);
+            
+            String kickString = "INSERT INTO `penalties` (`id`, `type`, `client_id`, `admin_id`, `duration`, `inactive`, `keyword`, `reason`, `data`, `time_add`, `time_edit`, `time_expire`) VALUES (NULL, 'Kick', ?, ?, '0', '0', 'rcon', ?, '', ?, ?, '-1')";
             kickStatement = con.prepareStatement(kickString);
 
             String updatePassword = "UPDATE `clients` SET `password`=? WHERE `clients`.`id`=?";
@@ -94,6 +98,10 @@ public class Database {
 
             if (banStatement != null) {
                 banStatement.close();
+            }
+            
+            if (tempbanStatement != null) {
+                tempbanStatement.close();
             }
 
             if (kickStatement != null) {
@@ -253,6 +261,32 @@ public class Database {
         banStatement.setString(5, String.valueOf(time));
 
         banStatement.executeUpdate();
+    }
+    
+    /**
+     * 
+     * @param clientid @id of the client the action will be against
+     * @param adminid @id of the admin calling the action
+     * @param reason admin supplied reason
+     * @param duration amount of time, in seconds
+     * @throws SQLException 
+     */
+    public void tempbanClient(String clientid, String adminid, String reason, int duration) throws SQLException {
+        tempbanStatement.setString(1, clientid);
+        tempbanStatement.setString(2, adminid);
+        
+        tempbanStatement.setString(3, String.valueOf(duration));
+        tempbanStatement.setString(4, reason);
+        
+        Date now = new Date();
+        long time = now.getTime() / 1000;
+        tempbanStatement.setString(5, String.valueOf(time));
+        tempbanStatement.setString(6, String.valueOf(time));
+        
+        long expire = time + duration;
+        tempbanStatement.setString(7, String.valueOf(expire));
+        
+        tempbanStatement.executeUpdate();
     }
 
     /**
