@@ -163,6 +163,10 @@ public class UserProtocol {
             str = cmdChangePassword(s);
         } else if (s[0].equals("search")) {
             str = cmdSearch(s);
+        } else if (s[0].equals("servername")) {
+            str = cmdGetServerName(s);
+        } else if (s[0].equals("serverinfo")) {
+            str = cmdGetServerInfo(s);
         } else {
             str = "Unknown command '" + s[0] + "'";
         }
@@ -171,6 +175,14 @@ public class UserProtocol {
         return str;
     }
 
+    private String cmdGetServerName(String[] opts) {
+        return cod.getServerName();
+    }
+    
+    private String cmdGetServerInfo(String[] opts) {
+        return cod.getInfo();
+    }
+    
     private String cmdSay(String[] opts) {
         if (opts.length < 2) {
             return "Invalid parameters for global message.";
@@ -194,6 +206,11 @@ public class UserProtocol {
         if (opts.length != 2) {
             return "Invalid parameters for map change!";
         }
+        
+        if (level < NEXTMAPPOWER)
+            return "You are not a high enough level to rotate the map";
+        if (level < MAPPOWER && !opts[1].equals("map_rotate"))
+            return "You are not a high enough level to change the map";
 
         return cod.changeMap(opts[1]);
     }
@@ -279,7 +296,7 @@ public class UserProtocol {
         return "ERROR: Client not found in current player list.";
     }
 
-    // opts: tempban:<cid>:<short_guid>:<duration>:<reason>
+    // opts: temp:<cid>:<short_guid>:<duration>:<reason>
     private String cmdTempBan(String[] opts) {
         if (opts.length != 5) {
             return "Invalid tempban parameters.";
@@ -295,6 +312,7 @@ public class UserProtocol {
         }
 
         ArrayList<Client> c = cod.getPlayerList();
+        String str = "";
 
         for (int i = 0; i < c.size(); i++) {
             Client client = c.get(i);
@@ -302,7 +320,19 @@ public class UserProtocol {
             if (client.getClientId().equals(opts[1]) && client.getShortGuid().equals(opts[2])) {
 
                 if (levelVsClient(client.getGuid())) {
-                    return cod.sendTempBan(client.getClientId(), client.getGuid(), opts[3], opts[4]);
+                    try {
+                        String array[] = {"", client.getGuid()};
+                        String reason = "(RCon) " + opts[4];
+
+                        d.banClient(cmdGetDataId(array), adminid, reason);
+                        str = "Ban added to database.\n ";
+                    } catch (SQLException e) {
+                        System.out.println(e.getMessage());
+                        str = "Adding ban to database failed...";
+                    }
+                    
+                    str += cod.sendTempBan(client.getClientId(), client.getGuid(), client.getName(), opts[4]);
+                    return str;
                 } else {
                     return client.getName() + " is a higher/equal level admin.";
                 }

@@ -6,7 +6,7 @@ public class ClientServer {
 
     private String host, rcon, status = "", map = "", info = "";
     private final String say = "say \"^0{^7FH^0}^7RCon: ",  end = "\"";
-    private int port;
+    private int port, timeout = 200;
     boolean updating = false;
 
     private NetRcon server;
@@ -22,17 +22,33 @@ public class ClientServer {
 
     private void init() {
         //create an rcon instance
-        server = new NetRcon(host, port, rcon, true, 200, 100);
+        server = new NetRcon(host, port, rcon, true, timeout, 50);
         getRconStatus();
         getInfo();
         //mapList();
     }
 
-    public void getInfo() {
+    public String getInfo() {
+        server.setReturnData(true);
         do {
             info = server.sendCommand("serverinfo");
             info = info.replaceAll("\uFFFD\uFFFD\uFFFD\uFFFDprint\n", "");
         } while (info.isEmpty());
+        server.setReturnData(false);
+        
+        return info;
+    }
+    
+    public String getServerName() {
+        String str = "";
+        
+        server.setReturnData(true);
+        do {
+            str = server.sendCommand("sv_hostname");
+        } while (str.isEmpty());
+        server.setReturnData(false);
+        
+        return str;
     }
 
     private void getRconStatus() {
@@ -95,6 +111,15 @@ public class ClientServer {
     }
 
     public String getMap() {
+        String str = "";
+        
+        server.setReturnData(true);
+        do {
+            str = server.sendCommand("mapname");
+        } while (str.isEmpty());
+        server.setReturnData(false);
+        
+        map = str;
         return map;
     }
 
@@ -106,7 +131,7 @@ public class ClientServer {
         String str = "";
 
         server.setReturnData(true);
-        server.setTimeout(300);
+        server.setTimeout(1000);
         if (newMap.equals("map_rotate")) {
             do {
                 str = server.sendCommand(newMap);
@@ -119,7 +144,7 @@ public class ClientServer {
 
         System.out.println(str);
         server.setReturnData(false);
-        server.setTimeout(200);
+        server.setTimeout(timeout);
 
         return str;
     }
@@ -190,17 +215,26 @@ public class ClientServer {
         String str = "";
 
         server.setReturnData(true);
-        str = server.sendCommand("banclient " + clientid);
+        do {
+            str = server.sendCommand("banclient " + clientid);
+        } while (str.isEmpty());
         server.setReturnData(false);
 
         return str;
     }
 
-    public String sendTempBan(String clientid, String guid, String timeLength, String reason) {
+    public String sendTempBan(String clientid, String guid, String name, String reason) {
         String str = "";
 
+        //System.out.println("client id: " + clientid);
+        //System.out.println("guid: " + guid);
+        sendMessage(name + " was temporarily banned for ^2" + reason);
+
         server.setReturnData(true);
-        str = server.sendCommand("clientkick " + clientid);
+        do {
+            str = server.sendCommand("clientkick " + clientid);
+        } while (str.isEmpty());
+
         server.setReturnData(false);
 
         return str;

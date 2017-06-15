@@ -113,7 +113,7 @@ public class NetRcon {
             counter = 0;
         }
         // Return the results
-        return retStr;
+        return retStr.replaceAll("\uFFFD\uFFFD\uFFFD\uFFFDprint\n", "");
 
     }
 
