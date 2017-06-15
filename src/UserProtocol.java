@@ -14,6 +14,7 @@ public class UserProtocol {
     private final int KICKPOWER = 20;
     private final int MAPPOWER = 40;
     private final int NEXTMAPPOWER = 20;
+    private final int RCON = 90;
 
     private final int LOGIN = 0;
     private final int VERIFY_VERSION = 1;
@@ -167,12 +168,24 @@ public class UserProtocol {
             str = cmdGetServerName(s);
         } else if (s[0].equals("serverinfo")) {
             str = cmdGetServerInfo(s);
+        } else if (s[0].equals("rcon")) {
+            str = cmdRcon(s);
         } else {
             str = "Unknown command '" + s[0] + "'";
         }
 
         //System.out.println("command results: " + str);
         return str;
+    }
+    
+    private String cmdRcon(String[] opts) {
+        if (opts.length != 2)
+            return "Invalid parameters for command 'rcon'";
+        
+        if (level < RCON)
+            return "You are not a high enough level";
+        
+        return cod.sendRcon(opts[1]);
     }
 
     private String cmdGetServerName(String[] opts) {
