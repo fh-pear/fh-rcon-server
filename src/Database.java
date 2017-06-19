@@ -22,6 +22,7 @@ public class Database {
     PreparedStatement kickStatement = null;
     PreparedStatement updatePasswordStatement = null;
     PreparedStatement nameSearchStatement = null;
+    PreparedStatement groupStatement = null;
 
     ResultSet rs = null;
 
@@ -62,6 +63,9 @@ public class Database {
 
             String name = "SELECT * FROM `clients` WHERE `name` LIKE ?";
             nameSearchStatement = con.prepareStatement(name);
+            
+            String group = "SELECT * FROM `groups`";
+            groupStatement = con.prepareStatement(group);
         } catch (SQLException e) {
             System.out.println("SQLException occurred");
             System.out.println(e.getMessage());
@@ -115,6 +119,10 @@ public class Database {
             if (nameSearchStatement != null) {
                 nameSearchStatement.close();
             }
+            
+            if (groupStatement != null) {
+                groupStatement.close();
+            }
 
             if (rs != null) {
                 rs.close();
@@ -130,6 +138,15 @@ public class Database {
 
     public ArrayList<String> getResults() {
         return results;
+    }
+    
+    /**
+     * 
+     * @return ResultSet contains rows from the b3 table `groups`
+     * @throws SQLException 
+     */
+    public ResultSet getGroups() throws SQLException {
+        return groupStatement.executeQuery();
     }
 
     /**

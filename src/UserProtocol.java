@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Map;
+import java.util.HashMap;
 
 public class UserProtocol {
 
@@ -24,6 +26,7 @@ public class UserProtocol {
     private int level, clientLevel;
     private boolean fullDetails, clientMask = false;
     private String adminid, clientid = "", adminName = "";
+    private Map<String, B3Level> levels;
 
     private int state = LOGIN;
 
@@ -59,7 +62,7 @@ public class UserProtocol {
             d.close();
         }
 
-        return theOutput.concat("\n...");
+        return theOutput.trim().concat("\n...");
     }
 
     private String processLogin(String in) {
@@ -82,7 +85,9 @@ public class UserProtocol {
         if (details.get(1) == null) {
             return "exit";
         }
-
+        
+        populateLevels();
+        
         //System.out.println("input: " + user[1]);
         //System.out.println("datab: " + details.get(1));
         if (details.get(1).equals(user[1])) {
@@ -170,12 +175,26 @@ public class UserProtocol {
             str = cmdGetServerInfo(s);
         } else if (s[0].equals("rcon")) {
             str = cmdRcon(s);
+        } else if (s[0].equals("getb3groups")) {
+            str = cmdb3Groups();
         } else {
             str = "Unknown command '" + s[0] + "'";
         }
 
         //System.out.println("command results: " + str);
         return str;
+    }
+    
+    private String cmdb3Groups() {
+        StringBuilder str = new StringBuilder(200);
+        
+        for (B3Level value : levels.values()) {
+            str.append(value);
+            str.append("\n");
+        }
+        
+        System.out.println("b3groups: " + str.toString());
+        return str.toString();
     }
     
     private String cmdRcon(String[] opts) {
@@ -197,18 +216,22 @@ public class UserProtocol {
     }
     
     private String cmdSay(String[] opts) {
+        StringBuilder str = new StringBuilder(50);
+        
         if (opts.length < 2) {
-            return "Invalid parameters for global message.";
+            str.append( "Invalid parameters for global message.");
         } else if (opts.length == 2) {
-            return cod.sendMessage(opts[1]);
+            str.append( cod.sendMessage(opts[1]));
         } else {
             String m = "";
             for (int i = 1; i < opts.length; i++) {
                 m += opts[i];
             }
 
-            return cod.sendMessage(m);
+            str.append( cod.sendMessage(m));
         }
+        
+        return str.toString();
     }
 
     private String cmdGetMap() {
@@ -229,14 +252,14 @@ public class UserProtocol {
     }
 
     private String cmdStatus() {
-        String str = "";
+        StringBuilder str = new StringBuilder(6000);
         ArrayList<Client> c = cod.getPlayerList();
 
         for (int i = 0; i < c.size(); i++) {
-            str = str.concat(c.get(i).toString(fullDetails));
+            str.append(c.get(i).toString(fullDetails));
         }
 
-        return str;
+        return str.toString();
     }
 
     // opts: pm:<cid>:<short_guid>:<message>
@@ -706,7 +729,7 @@ public class UserProtocol {
     public String cmdGetClient(String[] opts) {
         clientMask = false;
         ResultSet clientResults = null;
-        String str = "";
+        StringBuilder str = new StringBuilder();
 
         if (opts.length != 2) {
             return "Invalid getclient parameters";
@@ -727,33 +750,46 @@ public class UserProtocol {
 
             if (clientMask && level < 90) // mask info
             {
-                str = str + clientResults.getString("id") + "\t";
+                str.append(clientResults.getString("id"));
+                str.append("\t");
 
                 String guid = clientResults.getString("guid");
-                str = str + guid.substring(guid.length() - 8) + "\t";
+                str.append(guid.substring(guid.length() - 8));
+                str.append("\t");
 
-                str = str + clientResults.getString("name") + "\t";
-                str = str + clientResults.getString("connections") + "\t";
-                str = str + clientResults.getString("time_add") + "\t";
-                str = str + clientResults.getString("time_edit") + "\t";
+                str.append(clientResults.getString("name"));
+                str.append("\t");
+                str.append(clientResults.getString("connections"));
+                str.append("\t");
+                str.append(clientResults.getString("time_add"));
+                str.append("\t");
+                str.append(clientResults.getString("time_edit"));
+                str.append("\t");
             } else if (!clientMask && level < 90) // no mask
             {
 
             } else if (level >= 90) // ignore mask
             {
-                str = str + clientResults.getString("id") + "\t";
+                str.append(clientResults.getString("id"));
+                str.append("\t");
 
                 if (fullDetails) {
-                    str = str + clientResults.getString("guid") + "\t";
+                    str.append(clientResults.getString("guid"));
+                    str.append("\t");
                 } else {
                     String guid = clientResults.getString("guid");
-                    str = str + guid.substring(guid.length() - 8) + "\t";
+                    str.append(guid.substring(guid.length() - 8));
+                    str.append("\t");
                 }
 
-                str = str + clientResults.getString("name") + "\t";
-                str = str + clientResults.getString("connections") + "\t";
-                str = str + clientResults.getString("time_add") + "\t";
-                str = str + clientResults.getString("time_edit") + "\t";
+                str.append(clientResults.getString("name"));
+                str.append("\t");
+                str.append(clientResults.getString("connections"));
+                str.append("\t");
+                str.append(clientResults.getString("time_add"));
+                str.append("\t");
+                str.append(clientResults.getString("time_edit")); 
+                str.append("\t");
 
             }
         } catch (SQLException e) {
@@ -765,17 +801,17 @@ public class UserProtocol {
             return "Your program supplied '" + opts[1] + "' as a number. Could not parse as a number.";
         }
 
-        if (str.equals("")) {
-            str = "none";
+        if (str.toString().isEmpty()) {
+            return "none";
         }
 
-        return str;
+        return str.toString();
     }
 
     // opts: aliases:<@id>
     private String cmdAliases(String[] opts) {
         ResultSet results = null, clientResults = null;
-        String str = "";
+        StringBuilder str = new StringBuilder(6000);
 
         if (opts.length != 2) {
             return "Invalid aliases parameters";
@@ -800,9 +836,12 @@ public class UserProtocol {
             results = d.getAliases(opts[1]);
 
             while (results.next()) {
-                str = str + results.getString("alias") + "\t";
-                str = str + results.getString("time_add") + "\t";
-                str = str + results.getString("time_edit") + "\n";
+                str.append(results.getString("alias"));
+                str.append("\t");
+                str.append(results.getString("time_add"));
+                str.append("\t");
+                str.append(results.getString("time_edit"));
+                str.append("\n");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -813,11 +852,11 @@ public class UserProtocol {
             return "Your program supplied '" + opts[1] + "' as a number. Could not parse as a number.";
         }
 
-        if (str.equals("")) {
-            str = "none";
+        if (str.toString().isEmpty()) {
+            return "none";
         }
 
-        return str;
+        return str.toString();
     }
 
     // changepassword:<old password hash>:<new plaintext password>
@@ -891,7 +930,7 @@ public class UserProtocol {
     // penalties:<@id>
     private String cmdGetPenalties(String[] opts) {
         ResultSet results = null, clientResults = null;
-        String str = "";
+        StringBuilder str = new StringBuilder(5000);
 
         if (opts.length != 2) {
             return "Invalid penalties parameters";
@@ -907,14 +946,22 @@ public class UserProtocol {
             results = d.getPenalties(opts[1]);
 
             while (results.next()) {
-                str = str + results.getString("id") + "\t";
-                str = str + results.getString("type") + "\t";
-                str = str + results.getString("duration") + "\t";
-                str = str + results.getString("inactive") + "\t";
-                str = str + results.getString("reason") + "\t";
-                str = str + results.getString("data") + "\t";
-                str = str + results.getString("time_add") + "\t";
-                str = str + results.getString("time_expire") + "\n";
+                str.append(results.getString("id"));
+                str.append("\t");
+                str.append(results.getString("type"));
+                str.append("\t");
+                str.append(results.getString("duration"));
+                str.append("\t");
+                str.append(results.getString("inactive"));
+                str.append("\t");
+                str.append(results.getString("reason"));
+                str.append("\t");
+                str.append(results.getString("data"));
+                str.append("\t");
+                str.append(results.getString("time_add"));
+                str.append("\t");
+                str.append(results.getString("time_expire"));
+                str.append("\n");
             }
 
         } catch (SQLException e) {
@@ -924,11 +971,11 @@ public class UserProtocol {
             return "Your program supplied '" + opts[1] + "' as a number. Could not parse as a number.";
         }
 
-        if (str.equals("")) {
-            str = "none";
+        if (str.toString().isEmpty()) {
+            return "none";
         }
 
-        return str;
+        return str.toString();
     }
 
     private boolean levelVsClient(String guid) {
@@ -1042,5 +1089,34 @@ public class UserProtocol {
 
         //System.out.println("level: " + l);
         return l;
+    }
+    
+    public void populateLevels() {
+        ResultSet results;
+        levels = new HashMap<>(12);
+        
+        try {
+            results = d.getGroups();
+            
+            while (results.next()) {
+                B3Level b3l = new B3Level(results.getString("id"), 
+                        results.getString("name"), 
+                        results.getString("keyword"), 
+                        results.getString("level"));
+                
+                levels.put(b3l.getGroupbits(), b3l);
+            }
+        }
+        catch (SQLException e) {
+            //default b3 groups
+            levels.put("0", new B3Level("0", "Guest", "guest", "0"));
+            levels.put("1", new B3Level("1", "User", "user", "1"));
+            levels.put("2", new B3Level("2", "Regular", "reg", "2"));
+            levels.put("8", new B3Level("8", "Moderator", "mod", "20"));
+            levels.put("16", new B3Level("16", "Admin", "admin", "40"));
+            levels.put("32", new B3Level("32", "Full Admin", "fulladmin", "60"));
+            levels.put("64", new B3Level("64", "Senior Admin", "senioradmin", "80"));
+            levels.put("128", new B3Level("128", "Super Admin", "superadmin", "100"));
+        }
     }
 }
