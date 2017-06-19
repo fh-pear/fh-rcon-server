@@ -16,7 +16,8 @@ public class NetRcon {
 
     private String password;
     private String command;
-    private String retStr = "", str = "";
+    private String str = "";
+    private StringBuilder retStr = new StringBuilder(5000);
 
     private short counter = 0;
     private DatagramPacket dataPacketOut;
@@ -79,7 +80,7 @@ public class NetRcon {
             // Send the packet (rcon command) to the server.
             dataSocket.send(buildPacket(rconCommand));
 
-            retStr = "";
+            retStr.setLength(0);
             if (returnsData) {
                 while (true) {
                     // Create a new buffer to receive any response from the rcon command
@@ -92,11 +93,11 @@ public class NetRcon {
                     dataSocket.receive(dataPacketIn);
 
                     str = new String(dataPacketIn.getData(), 0, dataPacketIn.getLength());
-                    retStr += str;
+                    retStr.append(str);
                     //System.out.println(str);
                 }
             } else {
-                retStr = new String("Command sent on source port: " + dataSocket.getLocalPort());
+                retStr.append("Command sent on source port: " + dataSocket.getLocalPort());
             }
 
             sleeper();
@@ -113,7 +114,7 @@ public class NetRcon {
             counter = 0;
         }
         // Return the results
-        return retStr.replaceAll("\uFFFD\uFFFD\uFFFD\uFFFDprint\n", "");
+        return retStr.toString().trim().replaceAll("\uFFFD\uFFFD\uFFFD\uFFFDprint\n", "");
 
     }
 
