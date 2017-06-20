@@ -1,9 +1,9 @@
-
 import java.util.List;
 import java.util.ArrayList;
 import java.util.regex.*;
 
-public class Client {
+public class Client
+{
 
     private String cid, name, guid, score, dataid;
     private int level;
@@ -19,7 +19,8 @@ public class Client {
      * Example line: 9 70 309 aaaa1234567890bbbbbbcccccccddddd 77solor^7 0
      * 75.35.141.4:9704
      */
-    public Client(String str) {
+    public Client(String str)
+    {
         /* create a client object. string will look ssomething like the following three examples:
    	     9    70  309 aaaa1234567890bbbbbbcccccccddddd 77solor^7               0 75.35.141.4:9704      15390 25000
           
@@ -30,8 +31,11 @@ public class Client {
         String st[] = str.split(" ");
         ArrayList<String> split = new ArrayList<String>();
 
-        for (int i = 0; i < st.length; i++) {
-            if (st[i].equals("")); else {
+        for (int i = 0; i < st.length; i++)
+        {
+            if (st[i].equals(""));
+            else
+            {
                 split.add(st[i]);
                 //System.out.println("Index " + i +": \t" + st[i]);
             }
@@ -41,7 +45,8 @@ public class Client {
 
         // build the client attributes
         /* normally, split[] will have 9 elements. if it has more, then there are spaces in the client name */
-        if (split.size() == 9 || split.size() == 8) {
+        if (split.size() == 9 || split.size() == 8)
+        {
             //System.out.println("no spaces");
             cid = split.get(0);
             score = split.get(1);
@@ -49,10 +54,12 @@ public class Client {
             guid = split.get(3);
             exactName = split.get(4);
 
-            if (exactName.equals("^7")) {
+            if (exactName.equals("^7"))
+            {
                 exactName = "UnnamedPlayer^7";
             }
-        } else // name has spaces
+        }
+        else // name has spaces
         {
             int extra = split.size() - 9;
             //System.out.println("spaces");
@@ -62,11 +69,13 @@ public class Client {
             guid = split.get(3);
             //System.out.println("extra: " + extra);
 
-            for (int i = 4; i <= 4 + extra; i++) {
+            for (int i = 4; i <= 4 + extra; i++)
+            {
                 exactName = exactName + split.get(i) + " ";
             }
 
-            if (exactName.equals("^7")) {
+            if (exactName.equals("^7"))
+            {
                 exactName = "UnnamedPlayer^7";
             }
         }
@@ -86,7 +95,8 @@ public class Client {
      * @param eN becomes the exactName
      * @param g becomes the guid
      */
-    public Client(String id, String s, String n, String eN, String g) {
+    public Client(String id, String s, String n, String eN, String g)
+    {
         cid = id;
         score = s;
         name = n;
@@ -156,8 +166,10 @@ public class Client {
 			dataid = null;
 		}
    }*/
-    public String toString(boolean fullDetails) {
-        if (fullDetails) {
+    public String toString(boolean fullDetails)
+    {
+        if (fullDetails)
+        {
             String str = cid + "\t"
                     + score + "\t"
                     + name + "\t"
@@ -165,7 +177,9 @@ public class Client {
                     + guid + "\n";
 
             return str;
-        } else {
+        }
+        else
+        {
             String str = cid + "\t"
                     + score + "\t"
                     + name + "\t"
@@ -183,27 +197,32 @@ public class Client {
      * method will help combat some of it by detecting and kicking malformed
      * guids
      */
-    private void checkGuid() {
-        if (guid.length() != 32) {
+    private void checkGuid()
+    {
+        if (guid.length() != 32)
+        {
             guidValid = false;
         }
 
         Pattern pattern = Pattern.compile("[g-z][G-Z]");
         Matcher matcher = pattern.matcher(guid);
 
-        if (matcher.find()) {
+        if (matcher.find())
+        {
             guidValid = false;
         }
     }
 
-    public boolean guidIsValid() {
+    public boolean guidIsValid()
+    {
         return guidValid;
     }
 
     /**
      * makeName() builds the name field with no in-game color characters
      */
-    private void makeName() {
+    private void makeName()
+    {
         name = exactName;
         name = name.replaceAll("\\^0", "");
         name = name.replaceAll("\\^1", "");
@@ -222,11 +241,13 @@ public class Client {
      *
      * @return the guid field
      */
-    public String getGuid() {
+    public String getGuid()
+    {
         return guid;
     }
 
-    public String getShortGuid() {
+    public String getShortGuid()
+    {
         return guid.substring(guid.length() - 8);
     }
 
@@ -235,7 +256,8 @@ public class Client {
      *
      * @return the exactName field
      */
-    public String getExactName() {
+    public String getExactName()
+    {
         return exactName;
     }
 
@@ -244,7 +266,8 @@ public class Client {
      *
      * @return the name field
      */
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
@@ -253,11 +276,13 @@ public class Client {
      *
      * @return the cid field
      */
-    public String getClientId() {
+    public String getClientId()
+    {
         return cid;
     }
 
-    public String getScore() {
+    public String getScore()
+    {
         return score;
     }
 
@@ -265,17 +290,21 @@ public class Client {
      * equals() method used to compare two client objects
      *
      * @param c Client object to compare against
+     *
      * @return true if the objects are equal, false if not
      */
-    public boolean equals(Client c) {
-        if (guid.equals(c.getGuid()) && exactName.equals(c.getExactName()) && cid.equals(c.getClientId())) {
+    public boolean equals(Client c)
+    {
+        if (guid.equals(c.getGuid()) && exactName.equals(c.getExactName()) && cid.equals(c.getClientId()))
+        {
             return true;
         }
 
         return false;
     }
 
-    public String print() {
+    public String print()
+    {
         String str = cid + " " + name + " " + guid + " " + exactName;
         return str;
     }

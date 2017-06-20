@@ -1,4 +1,3 @@
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -7,7 +6,8 @@ import java.util.Properties;
 import java.io.IOException;
 import javax.naming.ConfigurationException;
 
-public final class Config {
+public final class Config
+{
     //constants
 
     public static final String DEFAULT_DBPORT = "3306";
@@ -54,7 +54,8 @@ public final class Config {
      */
     private static int listenPort;
 
-    public static void init(String fileName) throws NumberFormatException, IOException, ConfigurationException {
+    public static void init(String fileName) throws NumberFormatException, IOException, ConfigurationException
+    {
         Properties props = new Properties();
         InputStream is = new FileInputStream(fileName);
 
@@ -76,72 +77,89 @@ public final class Config {
 
     // some settings can be blank, and we can assign defaults
     // others we absolutely need (ex serverHost, dbHost)
-    public static void checkValues() throws ConfigurationException {
+    public static void checkValues() throws ConfigurationException
+    {
         /* REQUIRED settings for database */
         String message = " configuration property is required. Shutting down program...";
-        if (dbHost == null || dbHost.equals("")) {
+        if (dbHost == null || dbHost.equals(""))
+        {
             throw new ConfigurationException("db_host" + message);
         }
-        if (dbUser == null || dbUser.equals("")) {
+        if (dbUser == null || dbUser.equals(""))
+        {
             throw new ConfigurationException("db_user" + message);
         }
-        if (dbPassword == null || dbPassword.equals("")) {
+        if (dbPassword == null || dbPassword.equals(""))
+        {
             throw new ConfigurationException("db_password" + message);
         }
-        if (database == null || database.equals("")) {
+        if (database == null || database.equals(""))
+        {
             throw new ConfigurationException("database" + message);
         }
 
         /* Optional settings for database. If not initialized, do it here */
-        if (dbPort == null || dbPort.equals("")) {
+        if (dbPort == null || dbPort.equals(""))
+        {
             dbPort = DEFAULT_DBPORT;
         }
 
         /* REQUIRED settings for the gameserver */
-        if (rconPassword == null || rconPassword.equals("")) {
+        if (rconPassword == null || rconPassword.equals(""))
+        {
             throw new ConfigurationException("rcon_password" + message);
         }
-        if (serverHost == null || serverHost.equals("")) {
+        if (serverHost == null || serverHost.equals(""))
+        {
             throw new ConfigurationException("server_host" + message);
         }
 
         /* Optional settings for the gameserver. */
-        if (serverPort == 0) {
+        if (serverPort == 0)
+        {
             serverPort = DEFAULT_RCONPORT;
         }
-        if (listenPort == 0) {
+        if (listenPort == 0)
+        {
             listenPort = DEFAULT_LISTENPORT;
         }
     }
 
     //jdbc:mysql://<dbHost>:<dbPort>/<database>
-    public static String getDatabaseUrl() {
+    public static String getDatabaseUrl()
+    {
         String str = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + database;
 
         return str;
     }
 
-    public static String getRconPassword() {
+    public static String getRconPassword()
+    {
         return rconPassword;
     }
 
-    public static String getServerHost() {
+    public static String getServerHost()
+    {
         return serverHost;
     }
 
-    public static int getServerPort() {
+    public static int getServerPort()
+    {
         return serverPort;
     }
 
-    public static int getListenPort() {
+    public static int getListenPort()
+    {
         return listenPort;
     }
 
-    public static String getDatabaseUser() {
+    public static String getDatabaseUser()
+    {
         return dbUser;
     }
 
-    public static String getDatabasePassword() {
+    public static String getDatabasePassword()
+    {
         return dbPassword;
     }
 }

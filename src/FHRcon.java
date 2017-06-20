@@ -1,21 +1,29 @@
-
 import java.util.ArrayList;
 import javax.naming.ConfigurationException;
 
-public class FHRcon {
+public class FHRcon
+{
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException
+    {
         codServer ffa;
 
-        try {
+        try
+        {
             Config.init("config.properties");
-        } catch (ConfigurationException e) {
+        }
+        catch (ConfigurationException e)
+        {
             System.out.println(e.getMessage());
             System.exit(1);
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e)
+        {
             System.out.println(e.getMessage());
             System.out.println("Could not parse argument to a number format. Please check your config");
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
             System.out.println("Could not read config file.");
             System.exit(1);

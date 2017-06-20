@@ -1,9 +1,9 @@
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class Database {
+public class Database
+{
 
     private String url = Config.getDatabaseUrl();
     private String user = Config.getDatabaseUser();
@@ -26,8 +26,10 @@ public class Database {
 
     ResultSet rs = null;
 
-    public Database() {
-        try {
+    public Database()
+    {
+        try
+        {
             Class.forName("com.mysql.jdbc.Driver");
             con = DriverManager.getConnection(url, user, passwd);
 
@@ -51,10 +53,10 @@ public class Database {
 
             String banString = "INSERT INTO `penalties` (`id`, `type`, `client_id`, `admin_id`, `duration`, `inactive`, `keyword`, `reason`, `data`, `time_add`, `time_edit`, `time_expire`) VALUES (NULL, 'Ban', ?, ?, '0', '0', 'rcon', ?, '', ?, ?, '-1')";
             banStatement = con.prepareStatement(banString);
-            
+
             String tempbanString = "INSERT INTO `penalties` (`id`, `type`, `client_id`, `admin_id`, `duration`, `inactive`, `keyword`, `reason`, `data`, `time_add`, `time_edit`, `time_expire`) VALUES (NULL, 'TempBan', ?, ?, ?, '0', 'rcon', ?, '', ?, ?, ?)";
             tempbanStatement = con.prepareStatement(tempbanString);
-            
+
             String kickString = "INSERT INTO `penalties` (`id`, `type`, `client_id`, `admin_id`, `duration`, `inactive`, `keyword`, `reason`, `data`, `time_add`, `time_edit`, `time_expire`) VALUES (NULL, 'Kick', ?, ?, '0', '0', 'rcon', ?, '', ?, ?, '-1')";
             kickStatement = con.prepareStatement(kickString);
 
@@ -63,14 +65,18 @@ public class Database {
 
             String name = "SELECT * FROM `clients` WHERE `name` LIKE ?";
             nameSearchStatement = con.prepareStatement(name);
-            
+
             String group = "SELECT * FROM `groups`";
             groupStatement = con.prepareStatement(group);
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             System.out.println("SQLException occurred");
             System.out.println(e.getMessage());
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        }
+        catch (ClassNotFoundException e)
+        {
             System.out.println("Error: " + e.getMessage());
             e.printStackTrace();
         }
@@ -81,82 +87,105 @@ public class Database {
      * Gracefully close out all of the PreparedStatements and the database
      * connection
      */
-    public void close() {
-        try {
+    public void close()
+    {
+        try
+        {
             /*close out the prepared statements*/
-            if (guidStatement != null) {
+            if (guidStatement != null)
+            {
                 guidStatement.close();
             }
-            if (idStatement != null) {
+            if (idStatement != null)
+            {
                 idStatement.close();
             }
-            if (queryStatement != null) {
+            if (queryStatement != null)
+            {
                 queryStatement.close();
             }
-            if (aliasStatement != null) {
+            if (aliasStatement != null)
+            {
                 aliasStatement.close();
             }
-            if (penaltyStatement != null) {
+            if (penaltyStatement != null)
+            {
                 penaltyStatement.close();
             }
 
-            if (banStatement != null) {
+            if (banStatement != null)
+            {
                 banStatement.close();
             }
-            
-            if (tempbanStatement != null) {
+
+            if (tempbanStatement != null)
+            {
                 tempbanStatement.close();
             }
 
-            if (kickStatement != null) {
+            if (kickStatement != null)
+            {
                 kickStatement.close();
             }
 
-            if (updatePasswordStatement != null) {
+            if (updatePasswordStatement != null)
+            {
                 updatePasswordStatement.close();
             }
 
-            if (nameSearchStatement != null) {
+            if (nameSearchStatement != null)
+            {
                 nameSearchStatement.close();
             }
-            
-            if (groupStatement != null) {
+
+            if (groupStatement != null)
+            {
                 groupStatement.close();
             }
 
-            if (rs != null) {
+            if (rs != null)
+            {
                 rs.close();
             }
 
-            if (con != null) {
+            if (con != null)
+            {
                 con.close();
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             e.printStackTrace();
         }
     }
 
-    public ArrayList<String> getResults() {
+    public ArrayList<String> getResults()
+    {
         return results;
     }
-    
+
     /**
-     * 
+     *
      * @return ResultSet contains rows from the b3 table `groups`
-     * @throws SQLException 
+     *
+     * @throws SQLException
      */
-    public ResultSet getGroups() throws SQLException {
+    public ResultSet getGroups() throws SQLException
+    {
         return groupStatement.executeQuery();
     }
 
     /**
      *
      * @param id database id to be used in obtaining alias rows
+     *
      * @return ResultSet of aliases that belong to the key provided in parameter
      * id
+     *
      * @throws SQLException
      */
-    public ResultSet getAliases(String id) throws SQLException {
+    public ResultSet getAliases(String id) throws SQLException
+    {
         ResultSet aliasResults = null;
 
         aliasStatement.setString(1, id);
@@ -168,10 +197,13 @@ public class Database {
     /**
      *
      * @param guid full GUID of the client that is being searched for
+     *
      * @return ResultSet containing the row with the matching guid key
+     *
      * @throws SQLException
      */
-    public ResultSet getClient(String guid) throws SQLException {
+    public ResultSet getClient(String guid) throws SQLException
+    {
         ResultSet clientResults = null;
 
         guidStatement.setString(1, guid);
@@ -183,10 +215,13 @@ public class Database {
     /**
      *
      * @param id database id to obtain a row against
+     *
      * @return ResultSet of the belonging to the supplied id
+     *
      * @throws SQLException
      */
-    public ResultSet getClientById(String id) throws SQLException {
+    public ResultSet getClientById(String id) throws SQLException
+    {
         ResultSet clientResults = null;
 
         idStatement.setString(1, id);
@@ -198,10 +233,13 @@ public class Database {
     /**
      *
      * @param id the database id to query against
+     *
      * @return ResultSet containing all penalty rows belonging to parameter id
+     *
      * @throws SQLException
      */
-    public ResultSet getPenalties(String id) throws SQLException {
+    public ResultSet getPenalties(String id) throws SQLException
+    {
         ResultSet penaltyResults = null;
 
         penaltyStatement.setString(1, id);
@@ -213,10 +251,13 @@ public class Database {
     /**
      *
      * @param name full or partial name to search database for clients with
+     *
      * @return ResultSet containing the returned rows from the database
+     *
      * @throws SQLException
      */
-    public ResultSet searchByName(String name) throws SQLException {
+    public ResultSet searchByName(String name) throws SQLException
+    {
         ResultSet results = null;
 
         nameSearchStatement.setString(1, "%" + name + "%");
@@ -228,10 +269,13 @@ public class Database {
     /**
      *
      * @param guid full OR partial GUID to search database for
+     *
      * @return ResultSet containing the returned rows from the database
+     *
      * @throws SQLException
      */
-    public ResultSet searchByGuid(String guid) throws SQLException {
+    public ResultSet searchByGuid(String guid) throws SQLException
+    {
         ResultSet results = null;
 
         guidSearchStatement.setString(1, "%" + guid + "%");
@@ -244,9 +288,11 @@ public class Database {
      *
      * @param userid the @id in the database to be updated
      * @param newPassword new hashed password value
+     *
      * @throws SQLException
      */
-    public void updatePassword(String userid, String newPassword) throws SQLException {
+    public void updatePassword(String userid, String newPassword) throws SQLException
+    {
         updatePasswordStatement.setString(1, newPassword);
         updatePasswordStatement.setString(2, userid);
 
@@ -258,9 +304,11 @@ public class Database {
      * @param clientid the database id to execute query against
      * @param adminid the admin id who is requesting the action
      * @param reason the reason to be recorded in the database
+     *
      * @throws SQLException
      */
-    public void banClient(String clientid, String adminid, String reason) throws SQLException {
+    public void banClient(String clientid, String adminid, String reason) throws SQLException
+    {
         //sets the client_id
         banStatement.setString(1, clientid);
 
@@ -279,32 +327,34 @@ public class Database {
 
         banStatement.executeUpdate();
     }
-    
+
     /**
-     * 
+     *
      * @param clientid @id of the client the action will be against
      * @param adminid @id of the admin calling the action
      * @param reason admin supplied reason
      * @param duration amount of time, in minutes
      * @param seconds amount of time, in seconds
-     * @throws SQLException 
+     *
+     * @throws SQLException
      */
-    public void tempbanClient(String clientid, String adminid, String reason, 
-            long seconds, long duration) throws SQLException {
+    public void tempbanClient(String clientid, String adminid, String reason,
+            long seconds, long duration) throws SQLException
+    {
         tempbanStatement.setString(1, clientid);
         tempbanStatement.setString(2, adminid);
-        
+
         tempbanStatement.setString(3, String.valueOf(seconds));
         tempbanStatement.setString(4, reason);
-        
+
         Date now = new Date();
         long time = now.getTime() / 1000;
         tempbanStatement.setString(5, String.valueOf(time));
         tempbanStatement.setString(6, String.valueOf(time));
-        
+
         long expire = time + duration;
         tempbanStatement.setString(7, String.valueOf(expire));
-        
+
         tempbanStatement.executeUpdate();
     }
 
@@ -313,9 +363,11 @@ public class Database {
      * @param clientid the database id to execute the query against
      * @param adminid the database id of the admin requesting the action
      * @param reason reason for the action, to be recorded in the database
+     *
      * @throws SQLException
      */
-    public void kickClient(String clientid, String adminid, String reason) throws SQLException {
+    public void kickClient(String clientid, String adminid, String reason) throws SQLException
+    {
         kickStatement.setString(1, clientid);
         kickStatement.setString(2, adminid);
         kickStatement.setString(3, reason);
@@ -328,15 +380,18 @@ public class Database {
         kickStatement.executeUpdate();
     }
 
-    public void getDetails(String guid) {
+    public void getDetails(String guid)
+    {
 
         results.clear();
 
-        try {
+        try
+        {
             guidStatement.setString(1, guid);
             rs = guidStatement.executeQuery();
 
-            while (rs.next()) {
+            while (rs.next())
+            {
                 results.add(rs.getString("id"));
                 //System.out.println("adding: " + rs.getString("id"));
                 results.add(rs.getString("group_bits"));
@@ -344,24 +399,31 @@ public class Database {
                 results.add(rs.getString("mask_level"));
                 //System.out.println("adding: " + rs.getString("mask_level"));
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             System.out.println(e.getMessage());
         }
     }
 
-    public void login(String dbID) {
+    public void login(String dbID)
+    {
         results.clear();
 
-        try {
+        try
+        {
             idStatement.setString(1, dbID);
             rs = idStatement.executeQuery();
 
-            while (rs.next()) {
+            while (rs.next())
+            {
                 results.add(rs.getString("id"));
                 results.add(rs.getString("password"));
                 results.add(rs.getString("group_bits"));
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             System.out.println(e.getMessage());
             e.printStackTrace();
         }

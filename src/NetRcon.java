@@ -1,10 +1,10 @@
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-public class NetRcon {
+public class NetRcon
+{
 
     private InetAddress ipAddress;
 
@@ -23,7 +23,8 @@ public class NetRcon {
     private DatagramPacket dataPacketOut;
     private DatagramPacket dataPacketIn;
 
-    public NetRcon(String ip, int port, String password, boolean returnsData, int receiveTimeout, int sleepTimer) {
+    public NetRcon(String ip, int port, String password, boolean returnsData, int receiveTimeout, int sleepTimer)
+    {
         this.port = port;
         this.password = password;
         this.returnsData = returnsData;
@@ -32,20 +33,26 @@ public class NetRcon {
         parseAddress(ip);
     }
 
-    public void sleeper() throws InterruptedException {
+    public void sleeper() throws InterruptedException
+    {
         Thread.sleep(sleepTimer);
     }
 
-    private void parseAddress(String ip) {
-        try {
+    private void parseAddress(String ip)
+    {
+        try
+        {
             ipAddress = InetAddress.getByName(ip);
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             System.out.println(e.getMessage());
         }
         //System.out.println(ipAddress);
     }
 
-    public DatagramPacket buildPacket(String rconCommand) throws IOException {
+    public DatagramPacket buildPacket(String rconCommand) throws IOException
+    {
         // Build the command string to be sent
         // The leading Xs are place holders for out of bounds bytes that will be converted once we get the java bytes for the string
         command = "xxxxrcon " + password + " " + rconCommand;
@@ -65,8 +72,10 @@ public class NetRcon {
         return dataPacketOut;
     }
 
-    public String sendCommand(String rconCommand) {
-        try {
+    public String sendCommand(String rconCommand)
+    {
+        try
+        {
 
             // Create a new DatagramSocket instance
             DatagramSocket dataSocket = new DatagramSocket(null);
@@ -81,8 +90,10 @@ public class NetRcon {
             dataSocket.send(buildPacket(rconCommand));
 
             retStr.setLength(0);
-            if (returnsData) {
-                while (true) {
+            if (returnsData)
+            {
+                while (true)
+                {
                     // Create a new buffer to receive any response from the rcon command
                     byte[] buffer = new byte[4000];
 
@@ -96,20 +107,27 @@ public class NetRcon {
                     retStr.append(str);
                     //System.out.println(str);
                 }
-            } else {
+            }
+            else
+            {
                 retStr.append("Command sent on source port: " + dataSocket.getLocalPort());
             }
 
             sleeper();
 
-        } catch (IOException ex) {
+        }
+        catch (IOException ex)
+        {
             // yay, we made it :)
-        } catch (InterruptedException e) {
+        }
+        catch (InterruptedException e)
+        {
             System.out.println(e.getMessage());
         }
 
         counter++;
-        if (counter >= 10) {
+        if (counter >= 10)
+        {
             System.gc();
             counter = 0;
         }
@@ -118,11 +136,13 @@ public class NetRcon {
 
     }
 
-    public void setReturnData(boolean cond) {
+    public void setReturnData(boolean cond)
+    {
         returnsData = cond;
     }
 
-    public void setTimeout(int time) {
+    public void setTimeout(int time)
+    {
         receiveTimeout = time;
     }
 }

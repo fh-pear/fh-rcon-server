@@ -1,4 +1,3 @@
-
 import java.util.ArrayList;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,7 +6,8 @@ import java.util.logging.Logger;
 import java.util.Map;
 import java.util.LinkedHashMap;
 
-public class UserProtocol {
+public class UserProtocol
+{
 
     public static final String UNIT_SEPARATOR = "\t";
 
@@ -33,43 +33,63 @@ public class UserProtocol {
     private Database d;
     private Client clientCache;
 
-    public UserProtocol(ClientServer c) {
+    public UserProtocol(ClientServer c)
+    {
         cod = c;
     }
 
-    public String processInput(String theInput) {
+    public String processInput(String theInput)
+    {
         String theOutput = null;
 
-        if (state == LOGIN) {
-            if (theInput.equalsIgnoreCase("exit")) {
+        if (state == LOGIN)
+        {
+            if (theInput.equalsIgnoreCase("exit"))
+            {
                 theOutput = "exit";
-            } else {
+            }
+            else
+            {
                 theOutput = processLogin(theInput);
             }
-        } else if (state == VERIFY_VERSION) {
+        }
+        else if (state == VERIFY_VERSION)
+        {
             theOutput = processVersion(theInput);
-        } else if (state == WAITING) {
-            if (theInput.equalsIgnoreCase("exit")) {
+        }
+        else if (state == WAITING)
+        {
+            if (theInput.equalsIgnoreCase("exit"))
+            {
                 theOutput = "exit";
-            } else {
+            }
+            else
+            {
                 theOutput = processCommand(theInput);
             }
-        } else {
+        }
+        else
+        {
             theOutput = "exit";
         }
 
-        if (theOutput.equals("exit")) {
+        if (theOutput.equals("exit"))
+        {
             d.close();
         }
 
         return theOutput.trim().concat("\n...");
     }
 
-    private String processLogin(String in) {
+    private String processLogin(String in)
+    {
         d = new Database();
-        try {
+        try
+        {
             Thread.sleep(100);
-        } catch (InterruptedException ex) {
+        }
+        catch (InterruptedException ex)
+        {
             Logger.getLogger(UserProtocol.class.getName()).log(Level.SEVERE, null, ex);
         }
         String[] user = in.split(UNIT_SEPARATOR);
@@ -79,24 +99,30 @@ public class UserProtocol {
         d.login(user[0]);
         details = new ArrayList<String>(d.getResults());
 
-        if (details.isEmpty()) {
+        if (details.isEmpty())
+        {
             return "exit";
         }
-        if (details.get(1) == null) {
+        if (details.get(1) == null)
+        {
             return "exit";
         }
-        
+
         populateLevels();
-        
+
         //System.out.println("input: " + user[1]);
         //System.out.println("datab: " + details.get(1));
-        if (details.get(1).equals(user[1])) {
+        if (details.get(1).equals(user[1]))
+        {
             //System.out.println("correct");
             level = parseLevel(details.get(2));
 
-            if (level > 80) {
+            if (level > 80)
+            {
                 fullDetails = true;
-            } else {
+            }
+            else
+            {
                 fullDetails = false;
             }
 
@@ -110,152 +136,226 @@ public class UserProtocol {
             state = VERIFY_VERSION;
 
             return "Verify version";
-        } else {
+        }
+        else
+        {
             return "exit";
         }
     }
 
-    private String processVersion(String in) {
-        if (in.equals(Version.VERSION)) {
+    private String processVersion(String in)
+    {
+        if (in.equals(Version.VERSION))
+        {
             state = WAITING;
             //System.out.println("logged in, waiting");
             return "Logged in. Waiting for command(s).";
-        } else {
+        }
+        else
+        {
             return "You're using version: " + in
                     + "\n You need to update to version: " + Version.VERSION;
         }
     }
 
-    private String processCommand(String in) {
+    private String processCommand(String in)
+    {
         /* check the command. if it's changepassword, only output what the command is
          * this will ensure that a user's password doesn't get logged
          */
-        if (in.contains("changepassword")) {
+        if (in.contains("changepassword"))
+        {
             System.out.println("RECEIVED COMMAND: changepassword");
-        } else {
+        }
+        else
+        {
             System.out.println("RECEIVED COMMAND: " + in);
         }
 
         String str = "";
         String[] s = in.split(UNIT_SEPARATOR);
 
-        if (s[0].equals("status")) {
+        if (s[0].equals("status"))
+        {
             str = cmdStatus();
-        } else if (s[0].equals("kick")) {
+        }
+        else if (s[0].equals("kick"))
+        {
             str = cmdKick(s);
-        } else if (s[0].equals("getmap")) {
+        }
+        else if (s[0].equals("getmap"))
+        {
             str = cmdGetMap();
-        } else if (s[0].equals("map")) {
+        }
+        else if (s[0].equals("map"))
+        {
             str = cmdMap(s);
-        } else if (s[0].equals("pm")) {
+        }
+        else if (s[0].equals("pm"))
+        {
             str = cmdPM(s);
-        } else if (s[0].equals("say")) {
+        }
+        else if (s[0].equals("say"))
+        {
             str = cmdSay(s);
-        } else if (s[0].equals("aliases")) {
+        }
+        else if (s[0].equals("aliases"))
+        {
             str = cmdAliases(s);
-        } else if (s[0].equals("getdataid")) {
+        }
+        else if (s[0].equals("getdataid"))
+        {
             str = cmdGetDataId(s);
-        } else if (s[0].equals("penalties")) {
+        }
+        else if (s[0].equals("penalties"))
+        {
             str = cmdGetPenalties(s);
-        } else if (s[0].equals("getclient")) {
+        }
+        else if (s[0].equals("getclient"))
+        {
             str = cmdGetClient(s);
-        } else if (s[0].equals("ban")) {
+        }
+        else if (s[0].equals("ban"))
+        {
             str = cmdBan(s);
-        } else if (s[0].equals("tempban")) {
+        }
+        else if (s[0].equals("tempban"))
+        {
             str = cmdTempBan(s);
-        } else if (s[0].equals("getprofile")) {
+        }
+        else if (s[0].equals("getprofile"))
+        {
             str = cmdGetProfile(s);
-        } else if (s[0].equals("changepassword")) {
+        }
+        else if (s[0].equals("changepassword"))
+        {
             str = cmdChangePassword(s);
-        } else if (s[0].equals("search")) {
+        }
+        else if (s[0].equals("search"))
+        {
             str = cmdSearch(s);
-        } else if (s[0].equals("servername")) {
+        }
+        else if (s[0].equals("servername"))
+        {
             str = cmdGetServerName(s);
-        } else if (s[0].equals("serverinfo")) {
+        }
+        else if (s[0].equals("serverinfo"))
+        {
             str = cmdGetServerInfo(s);
-        } else if (s[0].equals("rcon")) {
+        }
+        else if (s[0].equals("rcon"))
+        {
             str = cmdRcon(s);
-        } else if (s[0].equals("getb3groups")) {
+        }
+        else if (s[0].equals("getb3groups"))
+        {
             str = cmdb3Groups();
-        } else {
+        }
+        else
+        {
             str = "Unknown command '" + s[0] + "'";
         }
 
         //System.out.println("command results: " + str);
         return str;
     }
-    
-    private String cmdb3Groups() {
+
+    private String cmdb3Groups()
+    {
         StringBuilder str = new StringBuilder(200);
-        
-        for (B3Level value : levels.values()) {
+
+        for (B3Level value : levels.values())
+        {
             str.append(value);
             str.append("\n");
         }
-        
+
         //System.out.println("b3groups: " + str.toString());
         return str.toString();
     }
-    
-    private String cmdRcon(String[] opts) {
+
+    private String cmdRcon(String[] opts)
+    {
         if (opts.length != 2)
+        {
             return "Invalid parameters for command 'rcon'";
-        
+        }
+
         if (level < RCON)
+        {
             return "You are not a high enough level";
-        
+        }
+
         return cod.sendRcon(opts[1]);
     }
 
-    private String cmdGetServerName(String[] opts) {
+    private String cmdGetServerName(String[] opts)
+    {
         return cod.getServerName();
     }
-    
-    private String cmdGetServerInfo(String[] opts) {
+
+    private String cmdGetServerInfo(String[] opts)
+    {
         return cod.getInfo();
     }
-    
-    private String cmdSay(String[] opts) {
+
+    private String cmdSay(String[] opts)
+    {
         StringBuilder str = new StringBuilder(50);
-        
-        if (opts.length < 2) {
-            str.append( "Invalid parameters for global message.");
-        } else if (opts.length == 2) {
-            str.append( cod.sendMessage(opts[1]));
-        } else {
+
+        if (opts.length < 2)
+        {
+            str.append("Invalid parameters for global message.");
+        }
+        else if (opts.length == 2)
+        {
+            str.append(cod.sendMessage(opts[1]));
+        }
+        else
+        {
             String m = "";
-            for (int i = 1; i < opts.length; i++) {
+            for (int i = 1; i < opts.length; i++)
+            {
                 m += opts[i];
             }
 
-            str.append( cod.sendMessage(m));
+            str.append(cod.sendMessage(m));
         }
-        
+
         return str.toString();
     }
 
-    private String cmdGetMap() {
+    private String cmdGetMap()
+    {
         return cod.getMap();
     }
 
-    private String cmdMap(String[] opts) {
-        if (opts.length != 2) {
+    private String cmdMap(String[] opts)
+    {
+        if (opts.length != 2)
+        {
             return "Invalid parameters for map change!";
         }
-        
+
         if (level < NEXTMAPPOWER)
+        {
             return "You are not a high enough level to rotate the map";
+        }
         if (level < MAPPOWER && !opts[1].equals("map_rotate"))
+        {
             return "You are not a high enough level to change the map";
+        }
 
         return cod.changeMap(opts[1]);
     }
 
-    private String cmdStatus() {
+    private String cmdStatus()
+    {
         StringBuilder str = new StringBuilder(6000);
         ArrayList<Client> c = cod.getPlayerList();
 
-        for (int i = 0; i < c.size(); i++) {
+        for (int i = 0; i < c.size(); i++)
+        {
             str.append(c.get(i).toString(fullDetails));
         }
 
@@ -263,22 +363,27 @@ public class UserProtocol {
     }
 
     // opts: pm:<cid>:<short_guid>:<message>
-    private String cmdPM(String[] opts) {
-        if (opts.length != 4) {
+    private String cmdPM(String[] opts)
+    {
+        if (opts.length != 4)
+        {
             return "Invalid PM parameters.";
         }
 
-        if (opts[1].isEmpty() || opts[2].isEmpty() || opts[3].isEmpty()) {
+        if (opts[1].isEmpty() || opts[2].isEmpty() || opts[3].isEmpty())
+        {
             return "Invalid parameters - '" + opts[0] + UNIT_SEPARATOR + opts[1] + UNIT_SEPARATOR
                     + opts[2] + UNIT_SEPARATOR + opts[3] + "'";
         }
 
         ArrayList<Client> c = cod.getPlayerList();
 
-        for (int i = 0; i < c.size(); i++) {
+        for (int i = 0; i < c.size(); i++)
+        {
             Client client = c.get(i);
 
-            if (client.getClientId().equals(opts[1]) && client.getShortGuid().equals(opts[2])) {
+            if (client.getClientId().equals(opts[1]) && client.getShortGuid().equals(opts[2]))
+            {
                 return cod.sendPM(client.getClientId(), adminName, client.getGuid(), opts[3]);
             }
         }
@@ -287,43 +392,58 @@ public class UserProtocol {
     }
 
     // opts: kick:<cid>:<short_guid>:<reason>
-    private String cmdKick(String[] opts) {
-        if (opts.length != 4) {
+    private String cmdKick(String[] opts)
+    {
+        if (opts.length != 4)
+        {
             return "Invalid kick parameters.";
         }
 
-        if (opts[1].isEmpty() || opts[2].isEmpty() || opts[3].isEmpty()) {
+        if (opts[1].isEmpty() || opts[2].isEmpty() || opts[3].isEmpty())
+        {
             return "Invalid parameters - '" + opts[0] + UNIT_SEPARATOR + opts[1] + UNIT_SEPARATOR
                     + opts[2] + UNIT_SEPARATOR + opts[3] + "'";
         }
 
-        if (level < KICKPOWER) {
+        if (level < KICKPOWER)
+        {
             return "You are not a high enough level to kick";
         }
 
         ArrayList<Client> c = cod.getPlayerList();
         String str = "";
 
-        for (int i = 0; i < c.size(); i++) {
+        for (int i = 0; i < c.size(); i++)
+        {
             Client client = c.get(i);
 
-            if (client.getClientId().equals(opts[1]) && client.getShortGuid().equals(opts[2])) {
+            if (client.getClientId().equals(opts[1]) && client.getShortGuid().equals(opts[2]))
+            {
 
-                if (levelVsClient(client.getGuid())) {
+                if (levelVsClient(client.getGuid()))
+                {
                     //System.out.println("this will kick: " + client.getName());
-                    try {
-                        String array[] = {"", client.getGuid()};
+                    try
+                    {
+                        String array[] =
+                        {
+                            "", client.getGuid()
+                        };
                         String reason = "(RCon) " + opts[3];
 
                         d.kickClient(cmdGetDataId(array), adminid, reason);
                         str = "Kick added to database. \n";
-                    } catch (SQLException e) {
+                    }
+                    catch (SQLException e)
+                    {
                         str = "Adding kick to the database failed...";
                     }
 
                     str += cod.sendClientKick(client.getClientId(), client.getGuid(), client.getName(), opts[3]);
                     return str;
-                } else {
+                }
+                else
+                {
                     return client.getName() + " is a higher/equal level admin.";
                 }
             }
@@ -333,51 +453,70 @@ public class UserProtocol {
     }
 
     // opts: temp:<cid>:<short_guid>:<duration>:<reason>
-    private String cmdTempBan(String[] opts) {
-        if (opts.length != 6) {
+    private String cmdTempBan(String[] opts)
+    {
+        if (opts.length != 6)
+        {
             return "Invalid tempban parameters.";
         }
 
-        if (opts[1].isEmpty() || opts[2].isEmpty() || opts[3].isEmpty() || opts[4].isEmpty()) {
+        if (opts[1].isEmpty() || opts[2].isEmpty() || opts[3].isEmpty() || opts[4].isEmpty())
+        {
             return "Invalid parameters - '" + opts[0] + UNIT_SEPARATOR + opts[1] + UNIT_SEPARATOR
-                    + opts[2] + UNIT_SEPARATOR + opts[3] + UNIT_SEPARATOR + opts[4] 
+                    + opts[2] + UNIT_SEPARATOR + opts[3] + UNIT_SEPARATOR + opts[4]
                     + UNIT_SEPARATOR + opts[5] + "'";
         }
 
-        if (level < TEMPBANPOWER) {
+        if (level < TEMPBANPOWER)
+        {
             return "You are not a high enough level to tempban";
         }
 
         ArrayList<Client> c = cod.getPlayerList();
         String str = "";
 
-        for (int i = 0; i < c.size(); i++) {
+        for (int i = 0; i < c.size(); i++)
+        {
             Client client = c.get(i);
 
-            if (client.getClientId().equals(opts[1]) && client.getShortGuid().equals(opts[2])) {
+            if (client.getClientId().equals(opts[1]) && client.getShortGuid().equals(opts[2]))
+            {
 
-                if (levelVsClient(client.getGuid())) {
-                    try {
-                        String array[] = {"", client.getGuid()};
+                if (levelVsClient(client.getGuid()))
+                {
+                    try
+                    {
+                        String array[] =
+                        {
+                            "", client.getGuid()
+                        };
                         String reason = "(RCon) " + opts[4];
                         long sec = Long.parseLong(opts[3]);
                         long dur = Long.parseLong(opts[5]);
                         if (dur < 0)
+                        {
                             throw new NumberFormatException(dur + " is negative");
-                        
+                        }
+
                         d.tempbanClient(cmdGetDataId(array), adminid, reason, sec, dur);
                         str = "Tempban added to database.\n ";
-                    } catch (SQLException e) {
+                    }
+                    catch (SQLException e)
+                    {
                         System.out.println(e.getMessage());
                         str = "Adding ban to database failed...";
-                    } catch (NumberFormatException e) {
+                    }
+                    catch (NumberFormatException e)
+                    {
                         return "You must supply a positive number for tempban duration: " + e;
                     }
-                    
+
                     //str += cod.sendTempBan(client.getClientId(), client.getGuid(), client.getName(), opts[4]);
                     str += client.getName() + " with guid " + client.getGuid() + " would be tempbanned";
                     return str;
-                } else {
+                }
+                else
+                {
                     return client.getName() + " is a higher/equal level admin.";
                 }
             }
@@ -387,43 +526,58 @@ public class UserProtocol {
     }
 
     // opts: ban:<cid>:<short_guid>:<reason>
-    private String cmdBan(String[] opts) {
-        if (opts.length != 4) {
+    private String cmdBan(String[] opts)
+    {
+        if (opts.length != 4)
+        {
             return "Invalid ban parameters.";
         }
 
-        if (opts[1].isEmpty() || opts[2].isEmpty() || opts[3].isEmpty()) {
+        if (opts[1].isEmpty() || opts[2].isEmpty() || opts[3].isEmpty())
+        {
             return "Invalid parameters - '" + opts[0] + UNIT_SEPARATOR + opts[1] + UNIT_SEPARATOR
                     + opts[2] + UNIT_SEPARATOR + opts[3] + "'";
         }
 
-        if (level < BANPOWER) {
+        if (level < BANPOWER)
+        {
             return "You are not a high enough level to ban";
         }
 
         ArrayList<Client> c = cod.getPlayerList();
         String str = "";
 
-        for (int i = 0; i < c.size(); i++) {
+        for (int i = 0; i < c.size(); i++)
+        {
             Client client = c.get(i);
 
-            if (client.getClientId().equals(opts[1]) && client.getShortGuid().equals(opts[2])) {
+            if (client.getClientId().equals(opts[1]) && client.getShortGuid().equals(opts[2]))
+            {
 
-                if (levelVsClient(client.getGuid())) {
-                    try {
-                        String array[] = {"", client.getGuid()};
+                if (levelVsClient(client.getGuid()))
+                {
+                    try
+                    {
+                        String array[] =
+                        {
+                            "", client.getGuid()
+                        };
                         String reason = "(RCon) " + opts[3];
 
                         d.banClient(cmdGetDataId(array), adminid, reason);
                         str = "Ban added to database.\n ";
-                    } catch (SQLException e) {
+                    }
+                    catch (SQLException e)
+                    {
                         System.out.println(e.getMessage());
                         str = "Adding ban to database failed...";
                     }
 
                     str += cod.sendBan(client.getClientId(), client.getGuid(), client.getName(), opts[3]);
                     return str;
-                } else {
+                }
+                else
+                {
                     return client.getName() + " is a higher/equal level admin.";
                 }
             }
@@ -437,19 +591,24 @@ public class UserProtocol {
      * @return str
      *      <id>:<name>:<guid>:<connections>:<level (String title)>:<level (int value)>:<first seen>:<last seen>
      */
-    private String cmdGetProfile(String opts[]) {
+    private String cmdGetProfile(String opts[])
+    {
         StringBuilder profile = new StringBuilder(150);
         ResultSet results = null;
 
-        if (opts.length != 2) {
+        if (opts.length != 2)
+        {
             return "Invalid paramenters for command 'getprofile'";
         }
 
-        if (opts[1].equals("self")) {
-            try {
+        if (opts[1].equals("self"))
+        {
+            try
+            {
                 results = d.getClientById(adminid);
 
-                if (results.next()) {
+                if (results.next())
+                {
                     profile.append(results.getString("id"));
                     profile.append(UNIT_SEPARATOR);
 
@@ -476,14 +635,20 @@ public class UserProtocol {
 
                     profile.append(results.getString("time_edit"));
                 }
-            } catch (SQLException e) {
+            }
+            catch (SQLException e)
+            {
                 System.out.println(e.getMessage());
             }
-        } else if (fullDetails) {
-            try {
+        }
+        else if (fullDetails)
+        {
+            try
+            {
                 results = d.getClientById(opts[1]);
 
-                if (results.next()) {
+                if (results.next())
+                {
                     profile.append(results.getString("id"));
                     profile.append(UNIT_SEPARATOR);
 
@@ -509,14 +674,20 @@ public class UserProtocol {
 
                     profile.append(results.getString("time_edit"));
                 }
-            } catch (SQLException e) {
+            }
+            catch (SQLException e)
+            {
                 System.out.println(e.getMessage());
             }
-        } else {
-            try {
+        }
+        else
+        {
+            try
+            {
                 results = d.getClientById(opts[1]);
 
-                if (results.next()) {
+                if (results.next())
+                {
                     profile.append(results.getString("id"));
                     profile.append(UNIT_SEPARATOR);
 
@@ -524,7 +695,8 @@ public class UserProtocol {
                     profile.append(UNIT_SEPARATOR);
 
                     String guid = results.getString("guid");
-                    if (guid.length() > 8) {
+                    if (guid.length() > 8)
+                    {
                         guid = guid.substring(guid.length() - 8);
                     }
                     profile.append(guid);
@@ -546,7 +718,9 @@ public class UserProtocol {
 
                     profile.append(results.getString("time_edit"));
                 }
-            } catch (SQLException e) {
+            }
+            catch (SQLException e)
+            {
                 System.out.println(e.getMessage());
             }
         }
@@ -558,38 +732,51 @@ public class UserProtocol {
     // opts: getdataid:<cid>:<short_guid>
     // OR
     // opts: getdataid:<guid>
-    private String cmdGetDataId(String[] opts) {
+    private String cmdGetDataId(String[] opts)
+    {
         ResultSet results = null;
         String dataid = "";
         ArrayList<Client> c = cod.getPlayerList();
 
-        try {
+        try
+        {
             if (opts.length == 2) //full guid search
             {
                 results = d.getClient(opts[1]);
-            } else if (opts.length == 3) //short guid search with a client id to match
+            }
+            else if (opts.length == 3) //short guid search with a client id to match
             {
-                for (int i = 0; i < c.size(); i++) {
+                for (int i = 0; i < c.size(); i++)
+                {
                     Client client = c.get(i);
 
-                    if (client.getClientId().equals(opts[1]) && client.getShortGuid().equals(opts[2])) {
+                    if (client.getClientId().equals(opts[1]) && client.getShortGuid().equals(opts[2]))
+                    {
                         results = d.getClient(client.getGuid());
                     }
                 }
 
-            } else {
+            }
+            else
+            {
                 return "Invalid getdataid parameters";
             }
 
-            if (results.next()); else {
+            if (results.next());
+            else
+            {
                 return "none";
             }
 
             dataid = results.getString("id");
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             e.printStackTrace();
             return "Error: " + e.getMessage() + "\n" + e.getStackTrace();
-        } catch (NullPointerException e) {
+        }
+        catch (NullPointerException e)
+        {
             return "none";
         }
 
@@ -598,35 +785,46 @@ public class UserProtocol {
 
     // opts: search:<type>:<data>
     // <type>: name, guid, @id
-    public String cmdSearch(String[] opts) {
+    public String cmdSearch(String[] opts)
+    {
         ResultSet results = null;
         String str = "";
 
-        try {
-            if (opts.length != 3) {
+        try
+        {
+            if (opts.length != 3)
+            {
                 return "Invalid search parameters";
             }
-            
-            if (opts[2].length() < 2 && !opts[1].toLowerCase().equals("@id"))
-                return "ERROR: Enter more than one character to search for";
 
-            if (opts[1].equals("name")) {
+            if (opts[2].length() < 2 && !opts[1].toLowerCase().equals("@id"))
+            {
+                return "ERROR: Enter more than one character to search for";
+            }
+
+            if (opts[1].equals("name"))
+            {
                 // the search will support partial name searches
                 results = d.searchByName(opts[2]);
                 StringBuilder string = new StringBuilder(150);
 
-                while (results.next()) {
+                while (results.next())
+                {
                     string.append(results.getString("id"));
                     string.append(UNIT_SEPARATOR);
 
                     string.append(results.getString("name"));
                     string.append(UNIT_SEPARATOR);
 
-                    if (fullDetails) {
+                    if (fullDetails)
+                    {
                         string.append(results.getString("guid"));
-                    } else {
+                    }
+                    else
+                    {
                         String guid = results.getString("guid");
-                        if (guid.length() > 8) {
+                        if (guid.length() > 8)
+                        {
                             guid = guid.substring(guid.length() - 8);
                         }
                         string.append(guid);
@@ -649,32 +847,40 @@ public class UserProtocol {
 
                     string.append(results.getString("time_edit"));
 
-                    if (!results.isLast()) {
+                    if (!results.isLast())
+                    {
                         string.append("\n");
                     }
                 }
 
                 str = string.toString();
 
-            } else if (opts[1].equals("guid")) {
+            }
+            else if (opts[1].equals("guid"))
+            {
                 /* the search will support partial guid searches
                  * this means that a valid search parameter for a guid COULD be "abc"
                  */
                 results = d.searchByGuid(opts[2]);
                 StringBuilder string = new StringBuilder(150);
 
-                while (results.next()) {
+                while (results.next())
+                {
                     string.append(results.getString("id"));
                     string.append(UNIT_SEPARATOR);
 
                     string.append(results.getString("name"));
                     string.append(UNIT_SEPARATOR);
 
-                    if (fullDetails) {
+                    if (fullDetails)
+                    {
                         string.append(results.getString("guid"));
-                    } else {
+                    }
+                    else
+                    {
                         String guid = results.getString("guid");
-                        if (guid.length() > 8) {
+                        if (guid.length() > 8)
+                        {
                             guid = guid.substring(guid.length() - 8);
                         }
                         string.append(guid);
@@ -697,28 +903,36 @@ public class UserProtocol {
 
                     string.append(results.getString("time_edit"));
 
-                    if (!results.isLast()) {
+                    if (!results.isLast())
+                    {
                         string.append("\n");
                     }
                 }
 
                 str = string.toString();
 
-            } else if (opts[1].equals("@id")) {
+            }
+            else if (opts[1].equals("@id"))
+            {
                 String[] profile = new String[2];
                 profile[0] = "getprofile";
                 profile[1] = opts[2];
                 str = cmdGetProfile(profile);
 
-            } else {
+            }
+            else
+            {
                 return "ERROR: Unknown search type " + opts[0] + " \n"
                         + "Available types are: name, guid, clientid";
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             str = "Database ERROR: " + e.getMessage();
         }
 
-        if (str.equals("")) {
+        if (str.equals(""))
+        {
             str = "none";
         }
 
@@ -726,25 +940,31 @@ public class UserProtocol {
     }
 
     // opts: getclient:<@id>
-    public String cmdGetClient(String[] opts) {
+    public String cmdGetClient(String[] opts)
+    {
         clientMask = false;
         ResultSet clientResults = null;
         StringBuilder str = new StringBuilder();
 
-        if (opts.length != 2) {
+        if (opts.length != 2)
+        {
             return "Invalid getclient parameters";
         }
 
-        try {
+        try
+        {
             Integer.parseInt(opts[1]);
             clientResults = d.getClientById(opts[1]);
 
-            if (clientResults.next()); else {
+            if (clientResults.next());
+            else
+            {
                 return "none";
             }
 
             clientLevel = parseLevel(clientResults.getString("group_bits"));
-            if (!clientResults.getString("mask_level").equals("0")) {
+            if (!clientResults.getString("mask_level").equals("0"))
+            {
                 clientMask = true;
             }
 
@@ -765,18 +985,23 @@ public class UserProtocol {
                 str.append("\t");
                 str.append(clientResults.getString("time_edit"));
                 str.append("\t");
-            } else if (!clientMask && level < 90) // no mask
+            }
+            else if (!clientMask && level < 90) // no mask
             {
 
-            } else if (level >= 90) // ignore mask
+            }
+            else if (level >= 90) // ignore mask
             {
                 str.append(clientResults.getString("id"));
                 str.append("\t");
 
-                if (fullDetails) {
+                if (fullDetails)
+                {
                     str.append(clientResults.getString("guid"));
                     str.append("\t");
-                } else {
+                }
+                else
+                {
                     String guid = clientResults.getString("guid");
                     str.append(guid.substring(guid.length() - 8));
                     str.append("\t");
@@ -788,20 +1013,27 @@ public class UserProtocol {
                 str.append("\t");
                 str.append(clientResults.getString("time_add"));
                 str.append("\t");
-                str.append(clientResults.getString("time_edit")); 
+                str.append(clientResults.getString("time_edit"));
                 str.append("\t");
 
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             e.printStackTrace();
             return "Database error: " + e.getMessage();
-        } catch (NullPointerException e) {
+        }
+        catch (NullPointerException e)
+        {
             return "Error: Database error";
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e)
+        {
             return "Your program supplied '" + opts[1] + "' as a number. Could not parse as a number.";
         }
 
-        if (str.toString().isEmpty()) {
+        if (str.toString().isEmpty())
+        {
             return "none";
         }
 
@@ -809,33 +1041,41 @@ public class UserProtocol {
     }
 
     // opts: aliases:<@id>
-    private String cmdAliases(String[] opts) {
+    private String cmdAliases(String[] opts)
+    {
         ResultSet results = null, clientResults = null;
         StringBuilder str = new StringBuilder(6000);
 
-        if (opts.length != 2) {
+        if (opts.length != 2)
+        {
             return "Invalid aliases parameters";
         }
 
-        if (!clientid.equals(opts[1])) {
+        if (!clientid.equals(opts[1]))
+        {
             cmdGetClient(opts);
         }
 
-        try {
+        try
+        {
             Integer.parseInt(opts[1]);
 
             clientResults = d.getClientById(opts[1]);
-            if (clientResults.next()); else {
+            if (clientResults.next());
+            else
+            {
                 return "none";
             }
 
-            if (!clientResults.getString("mask_level").equals("0") && level < 90) {
+            if (!clientResults.getString("mask_level").equals("0") && level < 90)
+            {
                 return "none";
             }
 
             results = d.getAliases(opts[1]);
 
-            while (results.next()) {
+            while (results.next())
+            {
                 str.append(results.getString("alias"));
                 str.append("\t");
                 str.append(results.getString("time_add"));
@@ -843,16 +1083,23 @@ public class UserProtocol {
                 str.append(results.getString("time_edit"));
                 str.append("\n");
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             e.printStackTrace();
             return "Database error: " + e.getMessage();
-        } catch (NullPointerException e) {
+        }
+        catch (NullPointerException e)
+        {
             return "Error: Database error";
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e)
+        {
             return "Your program supplied '" + opts[1] + "' as a number. Could not parse as a number.";
         }
 
-        if (str.toString().isEmpty()) {
+        if (str.toString().isEmpty())
+        {
             return "none";
         }
 
@@ -860,8 +1107,10 @@ public class UserProtocol {
     }
 
     // changepassword:<old password hash>:<new plaintext password>
-    private String cmdChangePassword(String[] opts) {
-        if (opts.length != 3) {
+    private String cmdChangePassword(String[] opts)
+    {
+        if (opts.length != 3)
+        {
             return "Invalid parameters for command 'changepassword'";
         }
         String str = "";
@@ -878,47 +1127,65 @@ public class UserProtocol {
         int lowCount = 0; //need 1
         int needLower = 1;
 
-        if (newPass.length() >= min) {
-            for (int i = 0; i < newPass.length(); i++) {
+        if (newPass.length() >= min)
+        {
+            for (int i = 0; i < newPass.length(); i++)
+            {
                 char c = newPass.charAt(i);
-                if (Character.isUpperCase(c)) {
+                if (Character.isUpperCase(c))
+                {
                     upCount++;
                 }
-                if (Character.isLowerCase(c)) {
+                if (Character.isLowerCase(c))
+                {
                     lowCount++;
                 }
-                if (Character.isDigit(c)) {
+                if (Character.isDigit(c))
+                {
                     digit++;
                 }
-                if (c >= 33 && c <= 46 || c == 64) {
+                if (c >= 33 && c <= 46 || c == 64)
+                {
                     special++;
                 }
             }
-            if (special >= needSpecial && lowCount >= needLower && upCount >= needUpper && digit >= needDigit) {
+            if (special >= needSpecial && lowCount >= needLower && upCount >= needUpper && digit >= needDigit)
+            {
                 //System.out.println("New Password is good");
                 //check old password for verification
-                try {
+                try
+                {
                     ResultSet user = d.getClientById(adminid);
-                    if (user.next()) {
+                    if (user.next())
+                    {
                         String oldHash = opts[1];
-                        if (oldHash.equals(user.getString("password"))) {
+                        if (oldHash.equals(user.getString("password")))
+                        {
                             //update password here since the current password matches
                             d.updatePassword(adminid, Function.getMD5(newPass));
                             str = "success";
-                        } else {
+                        }
+                        else
+                        {
                             str = "You entered your current password incorrectly";
                         }
                     }
-                } catch (SQLException ex) {
+                }
+                catch (SQLException ex)
+                {
                     str = "Failed to change password.";
                     Logger.getLogger(UserProtocol.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            } else {
+            }
+            else
+            {
                 str = "Your password must contain at least " + min + " characters: "
                         + needDigit + " number, " + needSpecial + " special character, "
                         + needUpper + " one uppercase, and " + needLower + " lower case letter.";
             }
-        } else {
+        }
+        else
+        {
             str = "Your password must contain at least " + min + " characters: "
                     + needDigit + " number, " + needSpecial + " special character, "
                     + needUpper + " one uppercase, and " + needLower + " lower case letter.";
@@ -928,24 +1195,29 @@ public class UserProtocol {
     }
 
     // penalties:<@id>
-    private String cmdGetPenalties(String[] opts) {
+    private String cmdGetPenalties(String[] opts)
+    {
         ResultSet results = null, clientResults = null;
         StringBuilder str = new StringBuilder(5000);
 
-        if (opts.length != 2) {
+        if (opts.length != 2)
+        {
             return "Invalid penalties parameters";
         }
 
-        if (!clientid.equals(opts[1])) {
+        if (!clientid.equals(opts[1]))
+        {
             cmdGetClient(opts);
         }
 
-        try {
+        try
+        {
             Integer.parseInt(opts[1]);
 
             results = d.getPenalties(opts[1]);
 
-            while (results.next()) {
+            while (results.next())
+            {
                 str.append(results.getString("id"));
                 str.append("\t");
                 str.append(results.getString("type"));
@@ -964,40 +1236,54 @@ public class UserProtocol {
                 str.append("\n");
             }
 
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             e.printStackTrace();
             return "Database error: " + e.getMessage();
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e)
+        {
             return "Your program supplied '" + opts[1] + "' as a number. Could not parse as a number.";
         }
 
-        if (str.toString().isEmpty()) {
+        if (str.toString().isEmpty())
+        {
             return "none";
         }
 
         return str.toString();
     }
 
-    private boolean levelVsClient(String guid) {
+    private boolean levelVsClient(String guid)
+    {
         d.getDetails(guid);
         ArrayList<String> results = new ArrayList<String>(d.getResults());
 
-        try {
-            if (level > parseLevel(results.get(1))) {
+        try
+        {
+            if (level > parseLevel(results.get(1)))
+            {
                 return true;
-            } else {
+            }
+            else
+            {
                 return false;
             }
-        } catch (IndexOutOfBoundsException e) { // cause: guid not in database. assume they are level 0
+        }
+        catch (IndexOutOfBoundsException e)
+        { // cause: guid not in database. assume they are level 0
             System.out.println("Not in database");
             return true;
         }
     }
 
-    private String getLevelTitle(int l) {
+    private String getLevelTitle(int l)
+    {
         String str = "";
 
-        switch (l) {
+        switch (l)
+        {
             case 100:
                 str = "Leader";
                 break;
@@ -1039,12 +1325,15 @@ public class UserProtocol {
         return str;
     }
 
-    private int parseLevel(String groupBits) {
+    private int parseLevel(String groupBits)
+    {
         int l = 0;
 
-        try {
+        try
+        {
 
-            switch (Integer.parseInt(groupBits)) {
+            switch (Integer.parseInt(groupBits))
+            {
                 case 2048: // leaders
                     l = 100;
                     break;
@@ -1083,31 +1372,37 @@ public class UserProtocol {
                     break;
             }
 
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e)
+        {
             e.printStackTrace();
         }
 
         //System.out.println("level: " + l);
         return l;
     }
-    
-    public void populateLevels() {
+
+    public void populateLevels()
+    {
         ResultSet results;
         levels = new LinkedHashMap<>(12);
-        
-        try {
+
+        try
+        {
             results = d.getGroups();
-            
-            while (results.next()) {
-                B3Level b3l = new B3Level(results.getString("id"), 
-                        results.getString("name"), 
-                        results.getString("keyword"), 
+
+            while (results.next())
+            {
+                B3Level b3l = new B3Level(results.getString("id"),
+                        results.getString("name"),
+                        results.getString("keyword"),
                         results.getString("level"));
-                
+
                 levels.put(b3l.getGroupbits(), b3l);
             }
         }
-        catch (SQLException e) {
+        catch (SQLException e)
+        {
             //default b3 groups
             levels.put("0", new B3Level("0", "Guest", "guest", "0"));
             levels.put("1", new B3Level("1", "User", "user", "1"));

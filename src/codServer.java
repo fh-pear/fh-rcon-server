@@ -1,14 +1,15 @@
-
 import java.util.*;
 import java.net.*;
 import java.io.*;
 
-public class codServer extends Server implements Runnable {
+public class codServer extends Server implements Runnable
+{
 
     private String serverName;
     private int serverPort;
 
-    public codServer(String svrN, String h, int portN, String rcon, int serverP) {
+    public codServer(String svrN, String h, int portN, String rcon, int serverP)
+    {
         super(h, portN, rcon);
         serverName = svrN;
         System.out.println("server name: " + serverName);
@@ -17,24 +18,36 @@ public class codServer extends Server implements Runnable {
 
     }
 
-    public void run() {
+    public void run()
+    {
         int clientNumber = 0;
         ServerSocket listener = null;
-        try {
+        try
+        {
             System.out.println("creating socket");
             listener = new ServerSocket(serverPort);
             System.out.println(serverName + " RCon server initiated, listening...");
 
-            while (true) {
+            while (true)
+            {
                 new UserThread(this, listener.accept(), clientNumber++).start();
             }
 
-        } catch (IOException e) {
-        } finally {
-            try {
+        }
+        catch (IOException e)
+        {
+        }
+        finally
+        {
+            try
+            {
                 listener.close();
-            } catch (IOException e) {
-            } catch (NullPointerException e) {
+            }
+            catch (IOException e)
+            {
+            }
+            catch (NullPointerException e)
+            {
                 System.out.println("This isn't good: " + e.getMessage());
                 e.printStackTrace();
             }
@@ -42,7 +55,8 @@ public class codServer extends Server implements Runnable {
 
     }
 
-    public String getServerName() {
+    public String getServerName()
+    {
         return serverName;
     }
 

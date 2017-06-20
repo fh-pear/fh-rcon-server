@@ -1,8 +1,8 @@
-
 import java.util.*;
 import java.io.IOException;
 
-public class Server {
+public class Server
+{
 
     private String host, rcon, status = "", map = "", info = "";
     private String say = "say \"^0{^7FH^0}^7RCon: ", end = "\"";
@@ -12,7 +12,8 @@ public class Server {
     private NetRcon server;
     private ArrayList<Client> playerList = new ArrayList<Client>();
 
-    public Server(String h, int portN, String r) {
+    public Server(String h, int portN, String r)
+    {
         host = h;
         port = portN;
         rcon = r;
@@ -20,7 +21,8 @@ public class Server {
         init();
     }
 
-    private void init() {
+    private void init()
+    {
         //create an rcon instance
         server = new NetRcon(host, port, rcon, true, 200, 100);
         getRconStatus();
@@ -28,16 +30,24 @@ public class Server {
         //mapList();
 
         Thread t1 = new Thread(
-                new Runnable() {
-            public void run() {
+                new Runnable()
+        {
+            public void run()
+            {
 
-                while (true) {
-                    try {
+                while (true)
+                {
+                    try
+                    {
                         Thread.sleep(2000);
                         getRconStatus();
-                    } catch (InterruptedException e) {
+                    }
+                    catch (InterruptedException e)
+                    {
 
-                    } catch (IndexOutOfBoundsException e) {
+                    }
+                    catch (IndexOutOfBoundsException e)
+                    {
                         System.out.println("haha we done fucked up somewhere");
                         System.gc();
                     }
@@ -47,33 +57,42 @@ public class Server {
         t1.start();
     }
 
-    public String getHost() {
+    public String getHost()
+    {
         return host;
     }
 
-    public String getPassword() {
+    public String getPassword()
+    {
         return rcon;
     }
 
-    public int getPort() {
+    public int getPort()
+    {
         return port;
     }
 
-    public void getInfo() {
-        do {
+    public void getInfo()
+    {
+        do
+        {
             info = server.sendCommand("serverinfo");
             info = info.replaceAll("\uFFFD\uFFFD\uFFFD\uFFFDprint\n", "");
-        } while (info.isEmpty());
+        }
+        while (info.isEmpty());
     }
 
-    private void getRconStatus() {
+    private void getRconStatus()
+    {
         boolean success = true;
         server.setReturnData(true);
 
-        do {
+        do
+        {
             status = server.sendCommand("status");
             status = status.replaceAll("\uFFFD\uFFFD\uFFFD\uFFFDprint\n", "");
-        } while (status.isEmpty());
+        }
+        while (status.isEmpty());
 
         //System.out.println(status);
         //System.out.println(info);
@@ -81,28 +100,41 @@ public class Server {
 
         updating = true;
         playerList.clear();
-        for (int i = 0; i < str.length; i++) {
-            if (i == 0) {
+        for (int i = 0; i < str.length; i++)
+        {
+            if (i == 0)
+            {
                 map = str[i];
                 map = map.replace("map: ", "");
-            } else if (i == 1) {
-                if (!str[i].equals("num score ping guid                             name            lastmsg address               qport rate")) {
+            }
+            else if (i == 1)
+            {
+                if (!str[i].equals("num score ping guid                             name            lastmsg address               qport rate"))
+                {
                     //System.out.println("Mismatch on header line");
                     success = false;
                     break;
                 }
-            } else if (i == 2) {
-                if (!str[i].equals("--- ----- ---- -------------------------------- --------------- ------- --------------------- ----- -----")) {
+            }
+            else if (i == 2)
+            {
+                if (!str[i].equals("--- ----- ---- -------------------------------- --------------- ------- --------------------- ----- -----"))
+                {
                     //System.out.println("Mismatch on spacer line");
                     success = false;
                     break;
                 }
-            } else {
+            }
+            else
+            {
                 //System.out.println("adding this: " + str[i]);
                 Client c = new Client(str[i]);
-                if (c.guidIsValid()) {
+                if (c.guidIsValid())
+                {
                     playerList.add(c);
-                } else {
+                }
+                else
+                {
                     sendKick(c.getClientId(), c.getExactName(), c.getGuid()); // send the clientid to the kick command, invalid guid
                 }
             }
@@ -111,40 +143,53 @@ public class Server {
         updating = false;
         server.setReturnData(false);
 
-        if (!success) {
+        if (!success)
+        {
             getRconStatus();
         }
     }
 
-    public void refreshStatus() {
+    public void refreshStatus()
+    {
         getRconStatus();
     }
 
-    public ArrayList<Client> getPlayerList() {
+    public ArrayList<Client> getPlayerList()
+    {
         return playerList;
     }
 
-    public String getMap() {
+    public String getMap()
+    {
         return map;
     }
 
-    public String getStatus() {
+    public String getStatus()
+    {
         return status;
     }
 
-    public String changeMap(String newMap) {
+    public String changeMap(String newMap)
+    {
         String str = "";
 
         server.setReturnData(true);
         server.setTimeout(300);
-        if (newMap.equals("map_rotate")) {
-            do {
+        if (newMap.equals("map_rotate"))
+        {
+            do
+            {
                 str = server.sendCommand(newMap);
-            } while (str.isEmpty());
-        } else {
-            do {
+            }
+            while (str.isEmpty());
+        }
+        else
+        {
+            do
+            {
                 str = server.sendCommand("map " + newMap);
-            } while (str.isEmpty());
+            }
+            while (str.isEmpty());
         }
 
         System.out.println(str);
@@ -154,52 +199,63 @@ public class Server {
         return str;
     }
 
-    public String sendPM(String clientid, String guid, String message) {
+    public String sendPM(String clientid, String guid, String message)
+    {
         String str = "";
 
         //System.out.println("client id: " + clientid);
         //System.out.println("guid: " + guid);
         server.setReturnData(true);
-        do {
+        do
+        {
             str = server.sendCommand("tell " + clientid + " \"^3[pm]>^7 " + message + end);
-        } while (str.isEmpty());
+        }
+        while (str.isEmpty());
         server.setReturnData(false);
 
         //System.out.println(str);
         return "Personal message sent!";
     }
 
-    public String sendMessage(String message) {
+    public String sendMessage(String message)
+    {
         String str = "";
 
         server.setReturnData(true);
-        do {
+        do
+        {
             str = server.sendCommand(say + message + end);
-        } while (str.isEmpty());
+        }
+        while (str.isEmpty());
         server.setReturnData(false);
 
         return "Message sent!";
     }
 
-    private void mapList() {
+    private void mapList()
+    {
         String str = "";
 
         server.setReturnData(true);
-        do {
+        do
+        {
             str = server.sendCommand("fdir *map_mp* .iwi");
-        } while (str.isEmpty());
+        }
+        while (str.isEmpty());
         server.setReturnData(false);
 
         //System.out.println(str);
     }
 
-    private void sendKick(String clientid, String name, String guid) {
+    private void sendKick(String clientid, String name, String guid)
+    {
         System.out.println("Kicking client: " + clientid + "\t" + name + "\t" + guid);
         server.sendCommand("clientkick " + clientid);
     }
 
     /* TODO implement database here? */
-    public String sendClientKick(String clientid, String guid, String name, String reason) {
+    public String sendClientKick(String clientid, String guid, String name, String reason)
+    {
         String str = "";
 
         //System.out.println("client id: " + clientid);
@@ -207,16 +263,19 @@ public class Server {
         sendMessage(name + " was kicked for ^2" + reason);
 
         server.setReturnData(true);
-        do {
+        do
+        {
             str = server.sendCommand("clientkick " + clientid);
-        } while (str.isEmpty());
+        }
+        while (str.isEmpty());
 
         server.setReturnData(false);
 
         return str;
     }
 
-    public String sendBan(String clientid, String guid, String reason) {
+    public String sendBan(String clientid, String guid, String reason)
+    {
         String str = "";
 
         server.setReturnData(true);
@@ -226,7 +285,8 @@ public class Server {
         return str;
     }
 
-    public String sendTempBan(String clientid, String guid, String timeLength, String reason) {
+    public String sendTempBan(String clientid, String guid, String timeLength, String reason)
+    {
         String str = "";
 
         server.setReturnData(true);
@@ -236,7 +296,8 @@ public class Server {
         return str;
     }
 
-    public boolean searchPlayerList(String clientid, String guid) {
+    public boolean searchPlayerList(String clientid, String guid)
+    {
         //getRconStatus();
         /*Thread t1 = new Thread(
          new Runnable() {
@@ -254,9 +315,11 @@ public class Server {
    	}*/
         boolean ret = false;
 
-        for (int i = 0; i < playerList.size(); i++) {
+        for (int i = 0; i < playerList.size(); i++)
+        {
 
-            if (playerList.get(i).getShortGuid().equals(guid) && playerList.get(i).getClientId().equals(clientid)) {
+            if (playerList.get(i).getShortGuid().equals(guid) && playerList.get(i).getClientId().equals(clientid))
+            {
                 return true;
             }
         }
