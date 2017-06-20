@@ -1,8 +1,9 @@
 /*
  * Datastruture for a b3 level
  */
+import java.util.Comparator;
 
-public class B3Level {
+public class B3Level implements Comparator<B3Level> {
     private String groupbits, name, keyword, level;
     
     /**
@@ -51,5 +52,10 @@ public class B3Level {
     @Override
     public String toString() {
         return groupbits + "::" + name + "::" + keyword + "::" + level;
+    }
+    
+    @Override
+    public int compare(B3Level l1, B3Level l2) {
+        return l1.getbits() - l2.getbits();
     }
 }

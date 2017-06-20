@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class UserProtocol {
 
@@ -193,7 +193,7 @@ public class UserProtocol {
             str.append("\n");
         }
         
-        System.out.println("b3groups: " + str.toString());
+        //System.out.println("b3groups: " + str.toString());
         return str.toString();
     }
     
@@ -1093,7 +1093,7 @@ public class UserProtocol {
     
     public void populateLevels() {
         ResultSet results;
-        levels = new HashMap<>(12);
+        levels = new LinkedHashMap<>(12);
         
         try {
             results = d.getGroups();
