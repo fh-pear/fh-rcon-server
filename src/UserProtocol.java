@@ -755,6 +755,10 @@ public class UserProtocol
                         results = d.getClient(client.getGuid());
                     }
                 }
+                
+                //System.out.println("results: " + results);
+                if (results == null)
+                    return "Client disconnected.";
 
             }
             else
