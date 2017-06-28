@@ -8,6 +8,7 @@ public class Database
     private String url = Config.getDatabaseUrl();
     private String user = Config.getDatabaseUser();
     private String passwd = Config.getDatabasePassword();
+    private String db = Config.getDatabase();
     private ArrayList<String> results = new ArrayList<String>();
 
     Connection con = null;
@@ -23,6 +24,7 @@ public class Database
     PreparedStatement updatePasswordStatement = null;
     PreparedStatement nameSearchStatement = null;
     PreparedStatement groupStatement = null;
+    PreparedStatement checkTagprotectStatement = null;
 
     ResultSet rs = null;
 
@@ -68,6 +70,9 @@ public class Database
 
             String group = "SELECT * FROM `groups`";
             groupStatement = con.prepareStatement(group);
+            
+            String tag = "SELECT TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA = ? and table_name = 'tagprotect'";
+            checkTagprotectStatement = con.prepareStatement(tag);
         }
         catch (SQLException e)
         {
@@ -141,6 +146,11 @@ public class Database
             if (groupStatement != null)
             {
                 groupStatement.close();
+            }
+            
+            if (checkTagprotectStatement != null)
+            {
+                checkTagprotectStatement.close();
             }
 
             if (rs != null)
