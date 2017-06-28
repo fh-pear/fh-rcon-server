@@ -19,8 +19,11 @@ public class Client
      * Example line: 9 70 309 aaaa1234567890bbbbbbcccccccddddd 77solor^7 0
      * 75.35.141.4:9704
      */
-    public Client(String str)
+    public Client(String str) throws IllegalArgumentException
     {
+        if (str.isEmpty())
+            throw new IllegalArgumentException("Provided string is empty");
+        //System.out.println("Client input: " + str);
         /* create a client object. string will look ssomething like the following three examples:
    	     9    70  309 aaaa1234567890bbbbbbcccccccddddd 77solor^7               0 75.35.141.4:9704      15390 25000
           

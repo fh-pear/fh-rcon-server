@@ -125,15 +125,22 @@ public class ClientServer
             }
             else
             {
-                //System.out.println("adding this: " + str[i]);
-                Client c = new Client(str[i]);
-                if (c.guidIsValid())
+                try
                 {
-                    playerList.add(c);
+                    //System.out.println("adding this: " + str[i]);
+                    Client c = new Client(str[i]);
+                    if (c.guidIsValid())
+                    {
+                        playerList.add(c);
+                    }
+                    else
+                    {
+                        sendKick(c.getClientId(), c.getExactName(), c.getGuid()); // send the clientid to the kick command, invalid guid
+                    }
                 }
-                else
+                catch (IllegalArgumentException e)
                 {
-                    sendKick(c.getClientId(), c.getExactName(), c.getGuid()); // send the clientid to the kick command, invalid guid
+                    //client string argument is empty
                 }
             }
         }
