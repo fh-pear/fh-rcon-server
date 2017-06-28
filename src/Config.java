@@ -132,6 +132,11 @@ public final class Config
 
         return str;
     }
+    
+    public static String getDatabase()
+    {
+        return database;
+    }
 
     public static String getRconPassword()
     {
