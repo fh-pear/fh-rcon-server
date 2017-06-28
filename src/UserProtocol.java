@@ -838,10 +838,10 @@ public class UserProtocol
                     string.append(results.getString("connections"));
                     string.append(UNIT_SEPARATOR);
 
-                    String level = results.getString("group_bits");
-                    int intLevel = parseLevel(level);
-                    level = getLevelTitle(intLevel);
-                    string.append(level);
+                    String playerLevel = results.getString("group_bits");
+                    int intLevel = parseLevel(playerLevel);
+                    playerLevel = getLevelTitle(intLevel);
+                    string.append(playerLevel);
                     string.append(UNIT_SEPARATOR);
                     string.append(intLevel);
                     string.append(UNIT_SEPARATOR);
